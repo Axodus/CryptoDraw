@@ -1,4 +1,4 @@
-# **CryptoDraw: Revolutionizing Lottery with Blockchain Technology** [![CI/CD Harmony](https://github.com/Axodus/CryptoDraw/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Axodus/CryptoDraw/actions/workflows/ci-cd.yml)
+# **CryptoDraw: Revolutionizing Lottery with Blockchain Technology** 
 
 ### **1. Introduction**
 
