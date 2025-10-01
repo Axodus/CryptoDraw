@@ -1,18 +1,39 @@
-.env
+# ============================================
+# CryptoDraw - .gitignore for Environment Files
+# ============================================
+# Add this to your main .gitignore
 
-# Node
+# Environment files (NEVER commit these!)
+.env
+.env.local
+.env.*.local
+
+# Keep template files (these are safe to commit)
+# .env.example
+# .env.development  
+# .env.production
+
+# Private keys and sensitive data
+*.key
+*.pem
+secrets/
+private/
+
+# Deployment artifacts with sensitive data
+deployment-*.json
+contracts-deployment.json
+addresses.json
+
+# Database credentials
+database.json
+db-config.json
+
+# API keys and tokens
+api-keys.json
+tokens.json
+
+# Node modules (if applicable)
 node_modules/
-package-lock.json
 
 # Build artifacts
-artifacts/
-cache/
-typechain/
-typechain-types/
-
-# IDE
-.vscode/
-.idea/
-
-#Ignore vscode AI rules
-.github\instructions\codacy.instructions.md
+artifacts
