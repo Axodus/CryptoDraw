@@ -10,6 +10,7 @@ module.exports = {
         enabled: true,
         runs: 200
       },
+      viaIR: true, // Enable IR compilation to avoid "Stack too deep" errors
       evmVersion: "paris" // Harmony supports up to Paris EVM
     }
   },

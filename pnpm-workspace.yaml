@@ -1,0 +1,3 @@
+onlyBuiltDependencies:
+  - '@arbitrum/nitro-contracts'
+  - keccak

@@ -1,13 +1,150 @@
 {
-  "devDependencies": {
-    "@chainlink/contracts": "^1.0.0",
-    "@nomiclabs/hardhat-ethers": "^2.2.3",
-    "@nomiclabs/hardhat-etherscan": "3.1.8",
-    "@openzeppelin/contracts": "4.9.6",
-    "ethers": "^5.0.0",
-    "hardhat": "^2.22.10"
+  "name": "cryptodraw",
+  "version": "1.0.0",
+  "description": "CryptoDraw - Decentralized Lottery System on Harmony Blockchain",
+  "main": "index.js",
+  "author": "mzfshark",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mzfshark/CryptoDraw.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mzfshark/CryptoDraw/issues"
+  },
+  "homepage": "https://github.com/mzfshark/CryptoDraw#readme",
+  "keywords": [
+    "blockchain",
+    "lottery",
+    "harmony",
+    "defi",
+    "nft",
+    "smart-contracts",
+    "solidity",
+    "hardhat"
+  ],
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "compile": "hardhat compile",
+    "clean": "hardhat clean",
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
+    "test:gas": "REPORT_GAS=true hardhat test",
+    "node": "hardhat node",
+    "console": "hardhat console",
+    "flatten": "hardhat flatten",
+    "size": "hardhat size-contracts",
+    "deploy:local": "hardhat run scripts/deploy-harmony.js --network localhost",
+    "deploy:testnet": "hardhat run scripts/deploy-harmony.js --network harmony_testnet",
+    "deploy:mainnet": "hardhat run scripts/deploy-harmony.js --network harmony",
+    "verify:testnet": "hardhat run scripts/verify.js --network harmony_testnet",
+    "verify:mainnet": "hardhat run scripts/verify.js --network harmony",
+    "setup:dev": "cp .env.development .env && echo 'Development environment configured'",
+    "setup:prod": "cp .env.production .env && echo 'Production environment configured'",
+    "setup:env": "chmod +x setup-env.sh && ./setup-env.sh",
+    "fund:testnet": "hardhat run scripts/fund-accounts.js --network harmony_testnet",
+    "fund:local": "hardhat run scripts/fund-accounts.js --network localhost",
+    "interact:testnet": "hardhat run scripts/interact.js --network harmony_testnet",
+    "interact:mainnet": "hardhat run scripts/interact.js --network harmony",
+    "upgrade:testnet": "hardhat run scripts/upgrade.js --network harmony_testnet",
+    "upgrade:mainnet": "hardhat run scripts/upgrade.js --network harmony",
+    "analyze": "slither . --print contract-summary",
+    "security": "mythril analyze contracts/ --solv 0.8.18",
+    "format": "prettier --write \"contracts/**/*.sol\" \"scripts/**/*.js\" \"test/**/*.js\"",
+    "lint": "solhint \"contracts/**/*.sol\"",
+    "lint:fix": "solhint \"contracts/**/*.sol\" --fix",
+    "docs": "hardhat docgen",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "start:backend": "cd src/backend && npm start",
+    "start:frontend": "cd src/frontend && npm run dev",
+    "dev": "concurrently \"npm run node\" \"npm run start:backend\" \"npm run start:frontend\"",
+    "dev:frontend": "cd src/frontend && vite",
+    "build:frontend": "cd src/frontend && vite build",
+    "preview:frontend": "cd src/frontend && vite preview",
+    "build": "npm run compile && npm run docs",
+    "precommit": "npm run lint && npm run test && npm run compile",
+    "prepare": "husky install",
+    "postinstall": "npm run compile",
+    "backup:contracts": "tar -czf backup-contracts-$(date +%Y%m%d).tar.gz contracts/ && echo 'Contracts backed up'",
+    "backup:deployments": "tar -czf backup-deployments-$(date +%Y%m%d).tar.gz deployments/ && echo 'Deployments backed up'",
+    "price:update": "hardhat run scripts/update-prices.js",
+    "draw:create": "hardhat run scripts/create-draw.js",
+    "draw:execute": "hardhat run scripts/execute-draw.js",
+    "admin:pause": "hardhat run scripts/admin/pause-contract.js",
+    "admin:unpause": "hardhat run scripts/admin/unpause-contract.js",
+    "admin:withdraw": "hardhat run scripts/admin/emergency-withdraw.js",
+    "agent:add": "hardhat run scripts/agent/add-agent.js",
+    "agent:remove": "hardhat run scripts/agent/remove-agent.js",
+    "monitoring": "hardhat run scripts/monitoring/health-check.js",
+    "stats": "hardhat run scripts/stats/game-statistics.js",
+    "vercel:login": "vercel login",
+    "vercel:deploy": "vercel --prod",
+    "vercel:dev": "vercel dev"
   },
   "dependencies": {
-    "dotenv": "^17.2.3"
-  }
+    "dotenv": "^16.3.1",
+    "@openzeppelin/contracts": "4.9.6",
+    "ethers": "^5.7.2",
+    "@reown/appkit": "^1.0.6",
+    "@reown/appkit-adapter-ethers": "^1.0.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@chainlink/contracts": "^0.8.0",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.8",
+    "@nomiclabs/hardhat-waffle": "^2.0.6",
+    "@typechain/ethers-v5": "^10.2.1",
+    "@typechain/hardhat": "^6.1.6",
+    "@types/chai": "^4.3.6",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.5.9",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@vitejs/plugin-react": "^4.1.1",
+    "chai": "^4.3.8",
+    "concurrently": "^8.2.1",
+    "ethereum-waffle": "^4.0.10",
+    "hardhat": "^2.22.10",
+    "hardhat-contract-sizer": "^2.10.0",
+    "hardhat-docgen": "^1.3.0",
+    "hardhat-gas-reporter": "^1.0.9",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
+    "prettier": "^3.0.3",
+    "prettier-plugin-solidity": "^1.1.3",
+    "solhint": "^4.0.0",
+    "solidity-coverage": "^0.8.4",
+    "ts-node": "^10.9.1",
+    "typechain": "^8.3.1",
+    "typescript": "^5.2.2",
+    "vercel": "^32.5.0",
+    "vite": "^5.0.0",
+    "vitepress": "^1.0.0-rc.20"
+  },
+  "lint-staged": {
+    "*.sol": [
+      "solhint --fix",
+      "prettier --write"
+    ],
+    "*.js": [
+      "prettier --write"
+    ],
+    "*.json": [
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run test"
+    }
+  },
+  "packageManager": "pnpm@10.17.1+sha512.17c560fca4867ae9473a3899ad84a88334914f379be46d455cbf92e5cf4b39d34985d452d2583baf19967fa76cb5c17bc9e245529d0b98745721aa7200ecaf7a"
 }

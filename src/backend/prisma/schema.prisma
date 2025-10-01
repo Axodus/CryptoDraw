@@ -1,0 +1,264 @@
+/**
+ * Schema Prisma para banco de dados
+ * CryptoDraw - Backend Database Schema
+ */
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Ticket {
+  id              String      @id
+  owner           String      @db.VarChar(42) // Ethereum address
+  game            GameType
+  numbers         Int[]
+  numbersPacked   String
+  roundsBought    Int
+  roundsRemaining Int
+  firstDrawId     Int
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  expirationAt    DateTime
+  status          TicketStatus @default(ACTIVE)
+  txHash          String      @db.VarChar(66) // Transaction hash
+  blockNumber     BigInt
+  
+  // Relacionamentos
+  draw            Draw        @relation(fields: [firstDrawId], references: [id])
+  claims          PrizeClaim[]
+  
+  // Índices
+  @@index([owner])
+  @@index([game])
+  @@index([status])
+  @@index([firstDrawId])
+  @@index([blockNumber])
+  @@map("tickets")
+}
+
+model Draw {
+  id              Int         @id
+  game            GameType
+  scheduledAt     DateTime
+  cutoffAt        DateTime
+  status          DrawStatus  @default(SCHEDULED)
+  merkleRoot      String?     @db.VarChar(66)
+  totalPoolUSD    String?     @db.VarChar(78) // Suporte para valores grandes
+  randomness      String?     @db.VarChar(66)
+  winningNumbers  Int[]
+  winningPacked   String?
+  ticketCount     Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relacionamentos
+  tickets         Ticket[]
+  results         DrawResult?
+  events          DrawEvent[]
+  
+  // Índices
+  @@index([game])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([cutoffAt])
+  @@map("draws")
+}
+
+model DrawResult {
+  id              Int         @id @default(autoincrement())
+  drawId          Int         @unique
+  totalPrize      String      @db.VarChar(78)
+  winnersData     Json        // JSON com winners por tier
+  payoutsData     Json        // JSON com payouts por tier
+  createdAt       DateTime    @default(now())
+  
+  // Relacionamentos
+  draw            Draw        @relation(fields: [drawId], references: [id])
+  
+  @@map("draw_results")
+}
+
+model PrizeClaim {
+  id              Int         @id @default(autoincrement())
+  ticketId        String
+  drawId          Int
+  winner          String      @db.VarChar(42)
+  tier            Int
+  amount          String      @db.VarChar(78)
+  txHash          String      @db.VarChar(66)
+  blockNumber     BigInt
+  claimedAt       DateTime    @default(now())
+  
+  // Relacionamentos
+  ticket          Ticket      @relation(fields: [ticketId], references: [id])
+  
+  // Índices
+  @@index([winner])
+  @@index([drawId])
+  @@index([ticketId])
+  @@unique([ticketId, drawId])
+  @@map("prize_claims")
+}
+
+model DrawEvent {
+  id              Int         @id @default(autoincrement())
+  drawId          Int
+  eventType       EventType
+  eventData       Json
+  txHash          String      @db.VarChar(66)
+  blockNumber     BigInt
+  logIndex        Int
+  createdAt       DateTime    @default(now())
+  
+  // Relacionamentos
+  draw            Draw        @relation(fields: [drawId], references: [id])
+  
+  // Índices
+  @@index([eventType])
+  @@index([blockNumber])
+  @@index([txHash])
+  @@unique([txHash, logIndex])
+  @@map("draw_events")
+}
+
+model MerkleProof {
+  id              Int         @id @default(autoincrement())
+  drawId          Int
+  ticketId        String
+  leafHash        String      @db.VarChar(66)
+  leafIndex       Int
+  proof           String[]    // Array de hashes
+  createdAt       DateTime    @default(now())
+  
+  // Índices
+  @@index([drawId])
+  @@index([ticketId])
+  @@unique([drawId, ticketId])
+  @@map("merkle_proofs")
+}
+
+model GameStatistic {
+  id              Int         @id @default(autoincrement())
+  game            GameType
+  number          Int
+  frequency       Int         @default(0)
+  lastSeen        DateTime?
+  updatedAt       DateTime    @updatedAt
+  
+  // Índices
+  @@index([game])
+  @@index([number])
+  @@unique([game, number])
+  @@map("game_statistics")
+}
+
+model UserStatistic {
+  id              Int         @id @default(autoincrement())
+  address         String      @db.VarChar(42)
+  game            GameType
+  totalTickets    Int         @default(0)
+  totalSpent      String      @default("0") @db.VarChar(78)
+  totalWon        String      @default("0") @db.VarChar(78)
+  winCount        Int         @default(0)
+  lastActivity    DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Índices
+  @@index([address])
+  @@index([game])
+  @@unique([address, game])
+  @@map("user_statistics")
+}
+
+model SystemEvent {
+  id              Int         @id @default(autoincrement())
+  eventType       String      @db.VarChar(50)
+  eventData       Json
+  severity        EventSeverity @default(INFO)
+  processed       Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  processedAt     DateTime?
+  
+  // Índices
+  @@index([eventType])
+  @@index([severity])
+  @@index([processed])
+  @@index([createdAt])
+  @@map("system_events")
+}
+
+model ProcessingQueue {
+  id              Int         @id @default(autoincrement())
+  jobType         String      @db.VarChar(50)
+  jobData         Json
+  status          QueueStatus @default(PENDING)
+  priority        Int         @default(0)
+  attempts        Int         @default(0)
+  maxAttempts     Int         @default(3)
+  error           String?     @db.Text
+  scheduledAt     DateTime    @default(now())
+  processedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Índices
+  @@index([jobType])
+  @@index([status])
+  @@index([priority])
+  @@index([scheduledAt])
+  @@map("processing_queue")
+}
+
+// Enums
+enum GameType {
+  LOTOFACIL
+  SUPERSETE
+}
+
+enum TicketStatus {
+  ACTIVE
+  EXPIRED
+  REDEEMED
+  BURNED
+}
+
+enum DrawStatus {
+  SCHEDULED
+  OPEN
+  CLOSED
+  CONSOLIDATED
+  RANDOM_REQUESTED
+  RANDOM_FULFILLED
+  SETTLED
+}
+
+enum EventType {
+  DRAW_CREATED
+  TICKET_MINTED
+  DRAW_CONSOLIDATED
+  RANDOMNESS_REQUESTED
+  RANDOMNESS_FULFILLED
+  PRIZE_CLAIMED
+}
+
+enum EventSeverity {
+  DEBUG
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+enum QueueStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
