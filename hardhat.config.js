@@ -1,10 +1,9 @@
 require('@nomiclabs/hardhat-ethers');
 require('@nomiclabs/hardhat-etherscan');
-require('dotenv').config();
 
 module.exports = {
   solidity: {
-    version: "0.8.7",
+    version: "0.8.18",
     settings: {
       optimizer: {
         enabled: true,
