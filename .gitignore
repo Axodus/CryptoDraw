@@ -1,4 +1,18 @@
 .env
 
+# Node
+node_modules/
+package-lock.json
+
+# Build artifacts
+artifacts/
+cache/
+typechain/
+typechain-types/
+
+# IDE
+.vscode/
+.idea/
+
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md
