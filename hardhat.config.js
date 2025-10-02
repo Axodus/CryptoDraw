@@ -1,6 +1,12 @@
 require('@nomiclabs/hardhat-ethers');
-require('@nomiclabs/hardhat-etherscan');
 require('dotenv').config();
+
+// Try to require network helpers with fallback
+try {
+  require('@nomicfoundation/hardhat-network-helpers');
+} catch (error) {
+  console.log('Warning: @nomicfoundation/hardhat-network-helpers not available');
+}
 
 module.exports = {
   solidity: {

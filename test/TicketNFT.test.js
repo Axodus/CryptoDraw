@@ -1,22 +1,20 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("TicketNFT Contract", function () {
-  // Fixture de deploy
-  async function deployTicketNFTFixture() {
-    const [owner, minter, user1, user2, attacker] = await ethers.getSigners();
+  let ticketNFT, owner, minter, user1, user2, attacker;
+
+  beforeEach(async function () {
+    [owner, minter, user1, user2, attacker] = await ethers.getSigners();
     
     // Deploy TicketNFT
     const TicketNFT = await ethers.getContractFactory("TicketNFT");
-    const ticketNFT = await TicketNFT.deploy();
-    
-    return { ticketNFT, owner, minter, user1, user2, attacker };
-  }
+    ticketNFT = await TicketNFT.deploy();
+    await ticketNFT.deployed();
+  });
 
   describe("Deployment", function () {
     it("Should set the right owner", async function () {
-      const { ticketNFT, owner } = await loadFixture(deployTicketNFTFixture);
       expect(await ticketNFT.owner()).to.equal(owner.address);
     });
 

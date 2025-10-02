@@ -4,7 +4,7 @@ const { ethers } = require("hardhat");
 describe("Basic Test", function () {
   it("Should verify that testing environment is working", async function () {
     const [owner] = await ethers.getSigners();
-    expect(owner.address).to.be.properAddress;
+    expect(owner.address).to.match(/^0x[a-fA-F0-9]{40}$/);
   });
 
   it("Should be able to deploy a simple contract", async function () {
@@ -13,7 +13,7 @@ describe("Basic Test", function () {
     const ticketNFT = await TicketNFT.deploy();
     await ticketNFT.deployed();
     
-    expect(ticketNFT.address).to.be.properAddress;
+    expect(ticketNFT.address).to.match(/^0x[a-fA-F0-9]{40}$/);
     expect(await ticketNFT.name()).to.equal("CryptoDraw Ticket NFT");
     expect(await ticketNFT.symbol()).to.equal("CDRAW");
   });
