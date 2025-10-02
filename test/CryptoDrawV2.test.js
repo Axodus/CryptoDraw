@@ -13,7 +13,8 @@ describe("CryptoDrawV2 Contract", function () {
     
     // Deploy PriceOracle
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
-    const priceOracle = await PriceOracle.deploy();
+    const initialOnePrice = ethers.utils.parseEther("2000");
+    const priceOracle = await PriceOracle.deploy(initialOnePrice);
     
     // Deploy TicketNFT
     const TicketNFT = await ethers.getContractFactory("TicketNFT");
@@ -27,7 +28,7 @@ describe("CryptoDrawV2 Contract", function () {
     const operationFund = owner.address;
     
     // Deploy CryptoDrawV2
-    const CryptoDrawV2 = await ethers.getContractFactory("CryptoDrawV2", {
+    const CryptoDrawV2 = await ethers.getContractFactory("contracts/CryptoDrawV2.sol:CryptoDraw", {
       libraries: {
         GameLibrary: gameLibrary.address,
       },
@@ -51,7 +52,10 @@ describe("CryptoDrawV2 Contract", function () {
     await cryptoDrawV2.grantRole(AGENT_ROLE, agent.address);
     
     // Configure TicketNFT minter
-    await ticketNFT.setMinter(cryptoDrawV2.address);
+    await ticketNFT.setCryptoDrawAddress(cryptoDrawV2.address);
+
+    // Habilitar token nativo ONE
+    await cryptoDrawV2.setSupportedToken(ethers.constants.AddressZero, true);
     
     return {
       cryptoDrawV2,
@@ -107,7 +111,7 @@ describe("CryptoDrawV2 Contract", function () {
       const ticketPriceUSD = ethers.utils.parseEther("1"); // $1
       const drawInterval = 24 * 60 * 60; // 1 day
       
-      await cryptoDrawV2.connect(owner).configureGame(
+      await cryptoDrawV2.connect(owner).setGameConfig(
         gameType,
         ticketPriceUSD,
         drawInterval,
@@ -127,7 +131,7 @@ describe("CryptoDrawV2 Contract", function () {
       const ticketPriceUSD = ethers.utils.parseEther("2"); // $2
       const drawInterval = 7 * 24 * 60 * 60; // 1 week
       
-      await cryptoDrawV2.connect(owner).configureGame(
+      await cryptoDrawV2.connect(owner).setGameConfig(
         gameType,
         ticketPriceUSD,
         drawInterval,
@@ -144,7 +148,7 @@ describe("CryptoDrawV2 Contract", function () {
       const { cryptoDrawV2, user1 } = await loadFixture(deployCryptoDrawV2Fixture);
       
       await expect(
-        cryptoDrawV2.connect(user1).configureGame(
+        cryptoDrawV2.connect(user1).setGameConfig(
           0, // SUPERSETE
           ethers.utils.parseEther("1"),
           24 * 60 * 60,
@@ -161,7 +165,7 @@ describe("CryptoDrawV2 Contract", function () {
       const drawInterval = 24 * 60 * 60;
       
       await expect(
-        cryptoDrawV2.connect(owner).configureGame(gameType, ticketPriceUSD, drawInterval, true)
+        cryptoDrawV2.connect(owner).setGameConfig(gameType, ticketPriceUSD, drawInterval, true)
       ).to.emit(cryptoDrawV2, "GameConfigured")
        .withArgs(gameType, ticketPriceUSD, drawInterval, true);
     });
@@ -175,7 +179,7 @@ describe("CryptoDrawV2 Contract", function () {
       const MockToken = await ethers.getContractFactory("MockToken");
       const mockToken = await MockToken.deploy("Mock Token", "MOCK", 18);
       
-      await cryptoDrawV2.connect(owner).updateTokenSupport(mockToken.address, true);
+  await cryptoDrawV2.connect(owner).setSupportedToken(mockToken.address, true);
       
       expect(await cryptoDrawV2.supportedTokens(mockToken.address)).to.be.true;
     });
@@ -187,8 +191,8 @@ describe("CryptoDrawV2 Contract", function () {
       const mockToken = await MockToken.deploy("Mock Token", "MOCK", 18);
       
       // Add then remove
-      await cryptoDrawV2.connect(owner).updateTokenSupport(mockToken.address, true);
-      await cryptoDrawV2.connect(owner).updateTokenSupport(mockToken.address, false);
+  await cryptoDrawV2.connect(owner).setSupportedToken(mockToken.address, true);
+  await cryptoDrawV2.connect(owner).setSupportedToken(mockToken.address, false);
       
       expect(await cryptoDrawV2.supportedTokens(mockToken.address)).to.be.false;
     });
@@ -200,7 +204,7 @@ describe("CryptoDrawV2 Contract", function () {
       const mockToken = await MockToken.deploy("Mock Token", "MOCK", 18);
       
       await expect(
-        cryptoDrawV2.connect(owner).updateTokenSupport(mockToken.address, true)
+        cryptoDrawV2.connect(owner).setSupportedToken(mockToken.address, true)
       ).to.emit(cryptoDrawV2, "TokenSupportUpdated")
        .withArgs(mockToken.address, true);
     });
@@ -290,22 +294,27 @@ describe("CryptoDrawV2 Contract", function () {
     it("Should allow buying SuperSete ticket with ETH", async function () {
       const { cryptoDrawV2, owner, operator, user1, ticketNFT, priceOracle } = await loadFixture(deployCryptoDrawV2Fixture);
       
-      await cryptoDrawV2.connect(owner).configureGame(0, ethers.utils.parseEther("1"), 24 * 60 * 60, true);
-      await cryptoDrawV2.connect(operator).createDraw(0);
-      
-      // Set ETH price to $2000 (so $1 = 0.0005 ETH)
-      await priceOracle.setPrice(200000000000); // $2000 with 8 decimals
-      
+      await cryptoDrawV2.connect(owner).setGameConfig(
+        0, // SUPERSETE
+        ethers.utils.parseEther("1"), // $1
+        24 * 60 * 60, // 1 day
+        true
+      );
+      // Set ETH price to $2000 (18 decimals)
+      await priceOracle.updatePrice(ethers.constants.AddressZero, ethers.utils.parseEther("2000"));
+
       const gameType = 0; // SUPERSETE
       const numbers = [1, 2, 3, 4, 5, 6, 7]; // 7 numbers for SuperSete
       const rounds = 1;
       const requiredETH = ethers.utils.parseEther("0.0005"); // $1 worth of ETH
-      
+
       const tx = await cryptoDrawV2.connect(user1).buyTicket(
         gameType,
         numbers,
         rounds,
-        ethers.constants.AddressZero, // No agent
+        ethers.constants.AddressZero,
+        requiredETH,
+        ethers.constants.AddressZero,
         { value: requiredETH }
       );
       
@@ -339,6 +348,8 @@ describe("CryptoDrawV2 Contract", function () {
           numbers,
           rounds,
           ethers.constants.AddressZero,
+          requiredETH,
+          ethers.constants.AddressZero,
           { value: requiredETH }
         )
       ).to.be.revertedWithCustomError(cryptoDrawV2, "InvalidNumbers");
@@ -361,6 +372,8 @@ describe("CryptoDrawV2 Contract", function () {
           gameType,
           numbers,
           rounds,
+          ethers.constants.AddressZero,
+          insufficientETH,
           ethers.constants.AddressZero,
           { value: insufficientETH }
         )
@@ -455,11 +468,10 @@ describe("CryptoDrawV2 Contract", function () {
 
   describe("Agent System", function () {
     it("Should calculate agent commission correctly", async function () {
-      const { cryptoDrawV2, owner, operator, agent, user1, priceOracle } = await loadFixture(deployCryptoDrawV2Fixture);
+      const { cryptoDrawV2, owner, agent, user1, priceOracle } = await loadFixture(deployCryptoDrawV2Fixture);
       
-      await cryptoDrawV2.connect(owner).configureGame(0, ethers.utils.parseEther("1"), 24 * 60 * 60, true);
-      await cryptoDrawV2.connect(operator).createDraw(0);
-      await priceOracle.setPrice(200000000000);
+      await cryptoDrawV2.connect(owner).setGameConfig(0, ethers.utils.parseEther("1"), 24 * 60 * 60, true);
+      await priceOracle.updatePrice(ethers.constants.AddressZero, ethers.utils.parseEther("2000"));
       
       const gameType = 0;
       const numbers = [1, 2, 3, 4, 5, 6, 7];
@@ -470,7 +482,9 @@ describe("CryptoDrawV2 Contract", function () {
         gameType,
         numbers,
         rounds,
-        agent.address, // With agent
+        ethers.constants.AddressZero,
+        requiredETH,
+        ethers.constants.AddressZero,
         { value: requiredETH }
       );
       
@@ -483,11 +497,10 @@ describe("CryptoDrawV2 Contract", function () {
     });
 
     it("Should allow agent to withdraw commission", async function () {
-      const { cryptoDrawV2, owner, operator, agent, user1, priceOracle } = await loadFixture(deployCryptoDrawV2Fixture);
+      const { cryptoDrawV2, owner, agent, user1, priceOracle } = await loadFixture(deployCryptoDrawV2Fixture);
       
-      await cryptoDrawV2.connect(owner).configureGame(0, ethers.utils.parseEther("1"), 24 * 60 * 60, true);
-      await cryptoDrawV2.connect(operator).createDraw(0);
-      await priceOracle.setPrice(200000000000);
+      await cryptoDrawV2.connect(owner).setGameConfig(0, ethers.utils.parseEther("1"), 24 * 60 * 60, true);
+      await priceOracle.updatePrice(ethers.constants.AddressZero, ethers.utils.parseEther("2000"));
       
       const gameType = 0;
       const numbers = [1, 2, 3, 4, 5, 6, 7];
@@ -498,28 +511,32 @@ describe("CryptoDrawV2 Contract", function () {
         gameType,
         numbers,
         rounds,
-        agent.address,
+        ethers.constants.AddressZero,
+        requiredETH,
+        ethers.constants.AddressZero,
         { value: requiredETH }
       );
       
       const commissionBefore = await cryptoDrawV2.agentCommissions(agent.address);
       expect(commissionBefore).to.be.gt(0);
       
-      await cryptoDrawV2.connect(agent).withdrawCommission();
+      // Garante saldo disponível no contrato para pagar a comissão
+      await user1.sendTransaction({ to: cryptoDrawV2.address, value: commissionBefore });
+
+      await cryptoDrawV2.connect(agent).withdrawAgentCommission();
       
       const commissionAfter = await cryptoDrawV2.agentCommissions(agent.address);
       expect(commissionAfter).to.equal(0);
     });
 
     it("Should prevent suspended agents from earning commission", async function () {
-      const { cryptoDrawV2, owner, operator, agent, user1, priceOracle } = await loadFixture(deployCryptoDrawV2Fixture);
+      const { cryptoDrawV2, owner, agent, user1, priceOracle } = await loadFixture(deployCryptoDrawV2Fixture);
       
-      await cryptoDrawV2.connect(owner).configureGame(0, ethers.utils.parseEther("1"), 24 * 60 * 60, true);
-      await cryptoDrawV2.connect(operator).createDraw(0);
-      await priceOracle.setPrice(200000000000);
+      await cryptoDrawV2.connect(owner).setGameConfig(0, ethers.utils.parseEther("1"), 24 * 60 * 60, true);
+      await priceOracle.updatePrice(ethers.constants.AddressZero, ethers.utils.parseEther("2000"));
       
       // Suspend agent
-      await cryptoDrawV2.connect(owner).suspendAgent(agent.address, true);
+      await cryptoDrawV2.connect(owner).setSuspendedAgent(agent.address, true);
       
       const gameType = 0;
       const numbers = [1, 2, 3, 4, 5, 6, 7];
@@ -531,7 +548,9 @@ describe("CryptoDrawV2 Contract", function () {
           gameType,
           numbers,
           rounds,
-          agent.address,
+          ethers.constants.AddressZero,
+          requiredETH,
+          ethers.constants.AddressZero,
           { value: requiredETH }
         )
       ).to.be.revertedWithCustomError(cryptoDrawV2, "AgentSuspended");
