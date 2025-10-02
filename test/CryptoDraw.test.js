@@ -27,8 +27,8 @@ describe("CryptoDraw Contract", function () {
     const TicketNFT = await ethers.getContractFactory("TicketNFT");
     const ticketNFT = await TicketNFT.deploy();
     
-    // Deploy CryptoDraw
-    const CryptoDraw = await ethers.getContractFactory("CryptoDraw");
+      // Use fully qualified contract name because project contains CryptoDraw and CryptoDrawV2
+      const CryptoDraw = await ethers.getContractFactory("contracts/CryptoDraw.sol:CryptoDraw");
     const cryptoDraw = await CryptoDraw.deploy(
       vrfCoordinator.address,
       subId,

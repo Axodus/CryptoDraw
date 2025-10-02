@@ -27,8 +27,8 @@ describe("CryptoDraw Integration Tests", function () {
     const TicketNFT = await ethers.getContractFactory("TicketNFT");
     const ticketNFT = await TicketNFT.deploy();
     
-    // Deploy CryptoDraw
-    const CryptoDraw = await ethers.getContractFactory("CryptoDraw");
+  // Deploy CryptoDraw (use fully qualified name to avoid artifact ambiguity)
+  const CryptoDraw = await ethers.getContractFactory("contracts/CryptoDraw.sol:CryptoDraw");
     const cryptoDraw = await CryptoDraw.deploy(
       vrfCoordinator.address,
       subId,

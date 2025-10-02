@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@nomicfoundation/hardhat-network-helpers':
-        specifier: ^3.0.0
-        version: 3.0.0(hardhat@2.26.3(bufferutil@4.0.5)(ts-node@10.9.2(@types/node@20.19.19)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.7))
+        specifier: ^1.0.12
+        version: 1.1.0(hardhat@2.26.3(bufferutil@4.0.5)(ts-node@10.9.2(@types/node@20.19.19)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.7))
       '@openzeppelin/contracts':
         specifier: 4.9.6
         version: 4.9.6
@@ -845,16 +845,10 @@ packages:
     resolution: {integrity: sha512-kqILRkAd455Sd6v8mfP3C1/0tCOynJWY+Ir+k/9Boocu2kObCrsFgG+ZWB7fSBVdd9cPVSNrnhWS+V+PEo637g==}
     engines: {node: '>= 18'}
 
-  '@nomicfoundation/hardhat-errors@3.0.2':
-    resolution: {integrity: sha512-8n4HZ0lfAFSw3SU1mrDXWslh11jH4W5MRyG9yT4d/vzx37uA3JBIzVQlnGVvE2ejl1QzqOqOxDuQqANWEzI9/w==}
-
-  '@nomicfoundation/hardhat-network-helpers@3.0.0':
-    resolution: {integrity: sha512-Nemas5cEaHyb4QoK40+USMxHMhIr4csRhpJFzm1T9I0/Wd1szw9kG412ubjUJxgm82ofyJGH3i5NKu7QgprmVg==}
+  '@nomicfoundation/hardhat-network-helpers@1.1.0':
+    resolution: {integrity: sha512-ZS+NulZuR99NUHt2VwcgZvgeD6Y63qrbORNRuKO+lTowJxNVsrJ0zbRx1j5De6G3dOno5pVGvuYSq2QVG0qCYg==}
     peerDependencies:
-      hardhat: ^3.0.0
-
-  '@nomicfoundation/hardhat-utils@3.0.2':
-    resolution: {integrity: sha512-d/LYe9k9W56dimt6mY6SA1SjadSKKyHZC2S+0JsSFr4BjU4SHBDaM0cKWx44JdZqBdMjLWCiRBcVaIq3X8qTAA==}
+      hardhat: ^2.26.0
 
   '@nomicfoundation/solidity-analyzer-darwin-arm64@0.1.2':
     resolution: {integrity: sha512-JaqcWPDZENCvm++lFFGjrDd8mxtf+CtLd2MiXvMNTBD33dContTZ9TWETwNFwg7JTJT5Q9HEecH7FA+HTSsIUw==}
@@ -1201,12 +1195,6 @@ packages:
 
   '@solidity-parser/parser@0.20.2':
     resolution: {integrity: sha512-rbu0bzwNvMcwAjH86hiEAcOeRI2EeK8zCkHDrFykh/Al8mvJeFmjy3UrE7GYQjNwOgbGUUtCn5/k8CB8zIu7QA==}
-
-  '@streamparser/json-node@0.0.22':
-    resolution: {integrity: sha512-sJT2ptNRwqB1lIsQrQlCoWk5rF4tif9wDh+7yluAGijJamAhrHGYpFB/Zg3hJeceoZypi74ftXk8DHzwYpbZSg==}
-
-  '@streamparser/json@0.0.22':
-    resolution: {integrity: sha512-b6gTSBjJ8G8SuO3Gbbj+zXbVx8NSs1EbpbMKpzGLWMdkR+98McH9bEjSz3+0mPJf68c5nxa3CrJHp5EQNXM6zQ==}
 
   '@szmarczak/http-timer@5.0.1':
     resolution: {integrity: sha512-+PmQX0PiAYPMeVYe237LJAYvOMYW1j2rH5YROyS3b4CTVJum34HfRvKvAzozHAQG0TnHNdUfY9nCeUyRAs//cw==}
@@ -3140,10 +3128,6 @@ packages:
 
   fast-diff@1.3.0:
     resolution: {integrity: sha512-VxPP4NqbUjj6MaAOafWeUn2cXWLcCtljklUtZf0Ind4XQ+QPtmA0b18zZy0jIQx+ExRVCR/ZQpBmik5lXshNsw==}
-
-  fast-equals@5.3.2:
-    resolution: {integrity: sha512-6rxyATwPCkaFIL3JLqw8qXqMpIZ942pTX/tbQFkRsDGblS8tNGtlUauA/+mt6RUfqn/4MoEr+WDkYoIQbibWuQ==}
-    engines: {node: '>=6.0.0'}
 
   fast-glob@3.3.3:
     resolution: {integrity: sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg==}
@@ -5518,10 +5502,6 @@ packages:
     resolution: {integrity: sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==}
     engines: {node: '>=14.0'}
 
-  undici@6.21.3:
-    resolution: {integrity: sha512-gBLkYIlEnSp8pFbT64yFgGE6UIB9tAkhukC23PmMDCe5Nd+cRqKxSjw5y54MK2AZMgZfJWMaNE4nYUHgi1XEOw==}
-    engines: {node: '>=18.17'}
-
   unist-util-is@6.0.0:
     resolution: {integrity: sha512-2qCTHimwdxLfz+YzdGfkqNlH0tLi9xjTnHddPmJwtIG9MGsdbutfTc4P+haPD7l7Cjxf/WZj+we5qfVPvvxfYw==}
 
@@ -6519,7 +6499,7 @@ snapshots:
   '@ethereumjs/common@2.6.0':
     dependencies:
       crc-32: 1.2.2
-      ethereumjs-util: 7.1.3
+      ethereumjs-util: 7.1.5
 
   '@ethereumjs/common@2.6.5':
     dependencies:
@@ -6541,7 +6521,7 @@ snapshots:
   '@ethereumjs/tx@3.4.0':
     dependencies:
       '@ethereumjs/common': 2.6.0
-      ethereumjs-util: 7.1.3
+      ethereumjs-util: 7.1.5
 
   '@ethereumjs/tx@3.5.2':
     dependencies:
@@ -6568,7 +6548,7 @@ snapshots:
       async-eventemitter: 0.2.4
       core-js-pure: 3.45.1
       debug: 2.6.9
-      ethereumjs-util: 7.1.3
+      ethereumjs-util: 7.1.5
       functional-red-black-tree: 1.0.1
       mcl-wasm: 0.7.9
       merkle-patricia-tree: 4.2.4
@@ -7020,32 +7000,10 @@ snapshots:
       '@nomicfoundation/edr-linux-x64-musl': 0.11.3
       '@nomicfoundation/edr-win32-x64-msvc': 0.11.3
 
-  '@nomicfoundation/hardhat-errors@3.0.2':
+  '@nomicfoundation/hardhat-network-helpers@1.1.0(hardhat@2.26.3(bufferutil@4.0.5)(ts-node@10.9.2(@types/node@20.19.19)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.7))':
     dependencies:
-      '@nomicfoundation/hardhat-utils': 3.0.2
-    transitivePeerDependencies:
-      - supports-color
-
-  '@nomicfoundation/hardhat-network-helpers@3.0.0(hardhat@2.26.3(bufferutil@4.0.5)(ts-node@10.9.2(@types/node@20.19.19)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.7))':
-    dependencies:
-      '@nomicfoundation/hardhat-errors': 3.0.2
-      '@nomicfoundation/hardhat-utils': 3.0.2
+      ethereumjs-util: 7.1.5
       hardhat: 2.26.3(bufferutil@4.0.5)(ts-node@10.9.2(@types/node@20.19.19)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.7)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@nomicfoundation/hardhat-utils@3.0.2':
-    dependencies:
-      '@streamparser/json-node': 0.0.22
-      debug: 4.4.3(supports-color@8.1.1)
-      env-paths: 2.2.1
-      ethereum-cryptography: 2.2.1
-      fast-equals: 5.3.2
-      json-stream-stringify: 3.1.6
-      rfdc: 1.4.1
-      undici: 6.21.3
-    transitivePeerDependencies:
-      - supports-color
 
   '@nomicfoundation/solidity-analyzer-darwin-arm64@0.1.2':
     optional: true
@@ -7698,12 +7656,6 @@ snapshots:
   '@solidity-parser/parser@0.18.0': {}
 
   '@solidity-parser/parser@0.20.2': {}
-
-  '@streamparser/json-node@0.0.22':
-    dependencies:
-      '@streamparser/json': 0.0.22
-
-  '@streamparser/json@0.0.22': {}
 
   '@szmarczak/http-timer@5.0.1':
     dependencies:
@@ -9975,8 +9927,6 @@ snapshots:
   fast-deep-equal@3.1.3: {}
 
   fast-diff@1.3.0: {}
-
-  fast-equals@5.3.2: {}
 
   fast-glob@3.3.3:
     dependencies:
@@ -12607,8 +12557,6 @@ snapshots:
   undici@5.29.0:
     dependencies:
       '@fastify/busboy': 2.1.1
-
-  undici@6.21.3: {}
 
   unist-util-is@6.0.0:
     dependencies:

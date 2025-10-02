@@ -1,4 +1,10 @@
 require('@nomiclabs/hardhat-ethers');
+// Register Hardhat Chai Matchers for improved assertions (reverted, emitted, etc.)
+try {
+  require('@nomicfoundation/hardhat-chai-matchers');
+} catch (e) {
+  console.log('Warning: @nomicfoundation/hardhat-chai-matchers not installed');
+}
 require('dotenv').config();
 
 // Try to require network helpers with fallback
