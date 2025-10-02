@@ -1,3 +1,10 @@
 onlyBuiltDependencies:
   - '@arbitrum/nitro-contracts'
+  - '@reown/appkit'
+  - '@trufflesuite/bigint-buffer'
+  - bufferutil
+  - core-js-pure
+  - esbuild
   - keccak
+  - secp256k1
+  - utf-8-validate
