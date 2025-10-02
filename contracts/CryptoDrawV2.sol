@@ -350,6 +350,20 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         draw.closedAt = block.timestamp;
         emit DrawClosed(game, drawId);
     }
+
+    /**
+     * @dev Compat: alias semântica usada nos testes atuais para fechamento simples
+     */
+    function closeDrawSimple(GameType game, uint32 drawId)
+        public
+        onlyRole(OPERATOR_ROLE)
+    {
+        Draw storage draw = draws[game][drawId];
+        require(draw.status == DrawStatus.OPEN, "Draw not open");
+        draw.status = DrawStatus.CLOSED;
+        draw.closedAt = block.timestamp;
+        emit DrawClosed(game, drawId);
+    }
     
     // ============ EXTERNAL FUNCTIONS - PRIZE CLAIM ============
     
@@ -695,5 +709,12 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         address agent
     ) external returns (uint256) {
         return buyTicket(GameType(game), numbers, rounds, paymentToken, maxPaymentAmount, agent);
+    }
+
+    /**
+     * @dev Compat: getter com nome "prizeOracle" esperado por alguns testes
+     */
+    function prizeOracle() external view returns (address) {
+        return address(priceOracle);
     }
 }
