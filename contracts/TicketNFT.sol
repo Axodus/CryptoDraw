@@ -153,7 +153,8 @@ contract TicketNFT is ERC721, Ownable, ERC721Burnable {
      */
     function burn(uint256 tokenId) public override onlyCryptoDraw {
         _updateTicketStatus(tokenId, TicketStatus.BURNED);
-        super.burn(tokenId);
+        // Bypass ERC721Burnable owner/approval requirement since onlyCryptoDraw is enforced
+        _burn(tokenId);
         emit TicketBurned(tokenId);
     }
     

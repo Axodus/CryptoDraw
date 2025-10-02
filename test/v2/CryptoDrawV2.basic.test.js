@@ -135,7 +135,7 @@ describe('CryptoDrawV2 (current API) - basic flows', function () {
 
     const drawId = await cryptoDraw.getCurrentDrawId(0);
 
-    await cryptoDraw.closeDraw(0, drawId, 123456);
+  await cryptoDraw.closeDraw(0, drawId, 123456);
     const closed = await cryptoDraw.getDraw(0, drawId);
     expect(closed.status).to.equal(4); // COMPLETED
     expect(closed.winningNumbersPacked).to.not.equal(0);

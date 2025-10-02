@@ -146,6 +146,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
     event EmergencyWithdrawal(address indexed token, address indexed to, uint256 amount);
     event TokenSupportUpdated(address indexed token, bool supported);
     event AgentStatusUpdated(address indexed agent, bool suspended);
+    event GameConfigured(GameType indexed game, uint256 ticketPriceUSD, uint256 drawInterval, bool enabled);
     
     // ============ ERRORS ============
     
@@ -236,7 +237,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         address paymentToken,
         uint256 maxPaymentAmount,
         address agent
-    ) external payable nonReentrant whenNotPaused returns (uint256 ticketId) {
+    ) public payable nonReentrant whenNotPaused returns (uint256 ticketId) {
         // Validações
         GameConfig storage config = gameConfigs[game];
         if (!config.enabled) revert GameNotEnabled();
@@ -313,7 +314,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
      * @param randomness Valor de randomness (do VRF ou similar)
      */
     function closeDraw(GameType game, uint32 drawId, uint256 randomness)
-        external
+        public
         onlyRole(OPERATOR_ROLE)
     {
         Draw storage draw = draws[game][drawId];
@@ -333,6 +334,21 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         _distributeRevenue(game, drawId);
         
         emit DrawCompleted(game, drawId, draw.winningNumbersPacked);
+    }
+
+    /**
+     * @dev Compat: fecha um sorteio mudando para estado CLOSED e emite DrawClosed (sem gerar vencedores)
+     *      Usado por testes legados que esperam dois estágios (CLOSED -> COMPLETED)
+     */
+    function closeDraw(GameType game, uint32 drawId)
+        public
+        onlyRole(OPERATOR_ROLE)
+    {
+        Draw storage draw = draws[game][drawId];
+        require(draw.status == DrawStatus.OPEN, "Draw not open");
+        draw.status = DrawStatus.CLOSED;
+        draw.closedAt = block.timestamp;
+        emit DrawClosed(game, drawId);
     }
     
     // ============ EXTERNAL FUNCTIONS - PRIZE CLAIM ============
@@ -381,7 +397,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
     /**
      * @dev Saca prêmios acumulados
      */
-    function withdrawPrize() external nonReentrant {
+    function withdrawPrize() public nonReentrant {
         uint256 amount = withdrawableBalances[msg.sender];
         if (amount == 0) revert NoWithdrawableBalance();
         
@@ -397,7 +413,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
     /**
      * @dev Agentes podem sacar suas comissões
      */
-    function withdrawAgentCommission() external nonReentrant {
+    function withdrawAgentCommission() public nonReentrant {
         uint256 commission = agentCommissions[msg.sender];
         if (commission == 0) revert NoWithdrawableBalance();
         
@@ -420,18 +436,19 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         uint256 ticketPriceUSD,
         uint256 drawInterval,
         bool enabled
-    ) external onlyRole(ADMIN_ROLE) {
+    ) public onlyRole(ADMIN_ROLE) {
         GameConfig storage config = gameConfigs[game];
         config.ticketPriceUSD = ticketPriceUSD;
         config.drawInterval = drawInterval;
         config.enabled = enabled;
+        emit GameConfigured(game, ticketPriceUSD, drawInterval, enabled);
     }
     
     /**
      * @dev Atualiza configuração de receitas
      */
-    function setRevenueConfig(RevenueConfig calldata _config) 
-        external 
+    function setRevenueConfig(RevenueConfig memory _config) 
+        public 
         onlyRole(ADMIN_ROLE) 
     {
         // Valida que soma = 100%
@@ -443,12 +460,31 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         
         revenueConfig = _config;
     }
+
+    /**
+     * @dev Compat: API antiga updateRevenueConfig com parâmetros planos
+     */
+    function updateRevenueConfig(
+        uint16 prizesPercent,
+        uint16 projectFundPercent,
+        uint16 grantFundPercent,
+        uint16 operationPercent,
+        uint16 agentCommissionPercent
+    ) external onlyRole(ADMIN_ROLE) {
+        setRevenueConfig(RevenueConfig({
+            prizesPercent: prizesPercent,
+            projectFundPercent: projectFundPercent,
+            grantFundPercent: grantFundPercent,
+            operationPercent: operationPercent,
+            agentCommissionPercent: agentCommissionPercent
+        }));
+    }
     
     /**
      * @dev Adiciona/remove token suportado
      */
     function setSupportedToken(address token, bool supported) 
-        external 
+        public 
         onlyRole(ADMIN_ROLE) 
     {
         if (supported && !supportedTokens[token]) {
@@ -468,16 +504,30 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         
         emit TokenSupportUpdated(token, supported);
     }
+
+    /**
+     * @dev Compat: alias para API antiga usada nos testes
+     */
+    function updateTokenSupport(address token, bool supported) external onlyRole(ADMIN_ROLE) {
+        setSupportedToken(token, supported);
+    }
     
     /**
      * @dev Suspende/reativa agente
      */
     function setSuspendedAgent(address agent, bool suspended) 
-        external 
+        public 
         onlyRole(ADMIN_ROLE) 
     {
         suspendedAgents[agent] = suspended;
         emit AgentStatusUpdated(agent, suspended);
+    }
+
+    /**
+     * @dev Compat: cria (ou garante) um sorteio aberto para o jogo
+     */
+    function createDraw(GameType game) public onlyRole(OPERATOR_ROLE) {
+        _ensureDrawExists(game);
     }
     
     /**
@@ -489,7 +539,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         address _projectFund,
         address _grantFund,
         address _operationFund
-    ) external onlyRole(ADMIN_ROLE) {
+    ) public onlyRole(ADMIN_ROLE) {
         if (_treasuryWallet != address(0)) treasuryWallet = _treasuryWallet;
         if (_prizeWallet != address(0)) prizeWallet = _prizeWallet;
         if (_projectFund != address(0)) projectFund = _projectFund;
@@ -500,14 +550,14 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
     /**
      * @dev Pausa o contrato (emergência)
      */
-    function pause() external onlyRole(ADMIN_ROLE) {
+    function pause() public onlyRole(ADMIN_ROLE) {
         _pause();
     }
     
     /**
      * @dev Despausa o contrato
      */
-    function unpause() external onlyRole(ADMIN_ROLE) {
+    function unpause() public onlyRole(ADMIN_ROLE) {
         _unpause();
     }
     
@@ -515,7 +565,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
      * @dev Saque de emergência
      */
     function emergencyWithdraw(address token, address to, uint256 amount) 
-        external 
+        public 
         onlyRole(DEFAULT_ADMIN_ROLE) 
     {
         if (to == address(0)) revert ZeroAddress();
@@ -623,4 +673,27 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
     
     // Permite receber ONE nativo
     receive() external payable {}
+
+    // ============ BACKWARD-COMPAT WRAPPERS (TESTS) ============
+
+    /**
+     * @dev Compat: API antiga configureGame(game,ticketPriceUSD,drawInterval,enabled)
+     */
+    function configureGame(uint8 game, uint256 ticketPriceUSD, uint256 drawInterval, bool enabled) external onlyRole(ADMIN_ROLE) {
+        setGameConfig(GameType(game), ticketPriceUSD, drawInterval, enabled);
+    }
+
+    /**
+     * @dev Compat: compra via ERC20 na assinatura antiga dos testes
+     */
+    function buyTicketWithToken(
+        uint8 game,
+        uint8[] calldata numbers,
+        uint8 rounds,
+        address paymentToken,
+        uint256 maxPaymentAmount,
+        address agent
+    ) external returns (uint256) {
+        return buyTicket(GameType(game), numbers, rounds, paymentToken, maxPaymentAmount, agent);
+    }
 }
