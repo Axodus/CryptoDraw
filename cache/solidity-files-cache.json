@@ -1004,8 +1004,8 @@
       ]
     },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/contracts/CryptoDrawV2.sol": {
-      "lastModificationDate": 1759427370392,
-      "contentHash": "7b82dc4f329740cb6e7ede53144421e7",
+      "lastModificationDate": 1759428027216,
+      "contentHash": "f8b21e4f4577e4c7e2d00eca11c3068f",
       "sourceName": "contracts/CryptoDrawV2.sol",
       "solcConfig": {
         "version": "0.8.18",
@@ -1244,8 +1244,8 @@
       ]
     },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/contracts/TicketNFT.sol": {
-      "lastModificationDate": 1759342884703,
-      "contentHash": "e504d4e1dd9c695448f09cf139779a82",
+      "lastModificationDate": 1759428027216,
+      "contentHash": "72aa94c166dc9ba9adad8a1c44f15603",
       "sourceName": "contracts/TicketNFT.sol",
       "solcConfig": {
         "version": "0.8.18",
