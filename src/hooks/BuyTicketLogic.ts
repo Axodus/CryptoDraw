@@ -57,7 +57,7 @@ export class BuyTicketManager {
 
       // Preparar dados da transação
       const txData = {
-        gameType: params.game === GameType.LOTOFACIL ? 0 : 1,
+  gameType: params.game === GameType.EASYLOTTO ? 0 : 1,
         numbers: packedNumbers.toString(),
         rounds: params.roundsBought,
         drawId: params.firstDrawId
@@ -116,7 +116,7 @@ export function validateBuyTicketParams(params: BuyTicketParams): string | null 
     return 'Números não fornecidos';
   }
 
-  if (params.game === GameType.LOTOFACIL) {
+  if (params.game === GameType.EASYLOTTO) {
     if (params.numbers.length !== 15) {
       return 'Lotofácil deve ter exatamente 15 números';
     }
@@ -126,7 +126,7 @@ export function validateBuyTicketParams(params: BuyTicketParams): string | null 
         return 'Números da Lotofácil devem estar entre 1 e 25';
       }
     }
-  } else if (params.game === GameType.SUPERSETE) {
+  } else if (params.game === GameType.SUPERSEVEN) {
     if (params.numbers.length !== 7) {
       return 'SuperSete deve ter exatamente 7 números';
     }
@@ -190,8 +190,8 @@ export class PriceEstimator {
 
       // Base prices (in wei)
       const basePrices = {
-        [GameType.LOTOFACIL]: '2000000000000000000', // 2 ONE
-        [GameType.SUPERSETE]: '1000000000000000000'   // 1 ONE
+  [GameType.EASYLOTTO]: '2000000000000000000', // 2 ONE
+  [GameType.SUPERSEVEN]: '1000000000000000000'   // 1 ONE
       };
 
       const basePrice = BigInt(basePrices[game]);
@@ -231,18 +231,18 @@ export class NumberValidator {
     const errors: string[] = [];
 
     // Validar quantidade de números
-    const expectedCount = game === GameType.LOTOFACIL ? 15 : 7;
+  const expectedCount = game === GameType.EASYLOTTO ? 15 : 7;
     if (numbers.length !== expectedCount) {
       errors.push(`${game} deve ter exatamente ${expectedCount} números`);
     }
 
     // Validar range dos números
-    if (game === GameType.LOTOFACIL) {
+  if (game === GameType.EASYLOTTO) {
       const invalidNumbers = numbers.filter(n => n < 1 || n > 25);
       if (invalidNumbers.length > 0) {
         errors.push('Números devem estar entre 1 e 25');
       }
-    } else if (game === GameType.SUPERSETE) {
+  } else if (game === GameType.SUPERSEVEN) {
       const invalidNumbers = numbers.filter(n => n < 0 || n > 9);
       if (invalidNumbers.length > 0) {
         errors.push('Números devem estar entre 0 e 9');
@@ -250,7 +250,7 @@ export class NumberValidator {
     }
 
     // Validar números únicos (só para Lotofácil)
-    if (game === GameType.LOTOFACIL) {
+  if (game === GameType.EASYLOTTO) {
       const uniqueNumbers = new Set(numbers);
       if (uniqueNumbers.size !== numbers.length) {
         errors.push('Todos os números devem ser únicos');

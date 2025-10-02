@@ -30,8 +30,8 @@ async function buyEasyLottoTicket() {
   const signer = provider.getSigner();
   const cryptoDraw = new ethers.Contract(CRYPTO_DRAW_ADDRESS, CryptoDrawABI, signer);
   
-  // Game type: 0 = SUPERSETE, 1 = EASYLOTTO
-  const gameType = 1; // EasyLotto
+  // Game type: 0 = EASYLOTTO, 1 = SUPERSEVEN
+  const gameType = 0; // EasyLotto
   
   // Select 15 numbers from 1-25
   const numbers = [1, 2, 3, 5, 7, 11, 13, 15, 17, 19, 21, 22, 23, 24, 25];
@@ -85,7 +85,7 @@ async function buySuperSevenTicket() {
   const cryptoDraw = new ethers.Contract(CRYPTO_DRAW_ADDRESS, CryptoDrawABI, signer);
   
   // Game type: SUPERSEVEN
-  const gameType = 0;
+  const gameType = 1;
   
   // Select 7 columns (0-9 each)
   const columns = [3, 0, 9, 7, 1, 2, 4];
@@ -445,7 +445,7 @@ async function closeDraw(gameType, drawId, randomness) {
   const signer = provider.getSigner();
   const cryptoDraw = new ethers.Contract(CRYPTO_DRAW_ADDRESS, CryptoDrawABI, signer);
   
-  // gameType: 0 = SUPERSETE, 1 = EASYLOTTO
+  // gameType: 0 = EASYLOTTO, 1 = SUPERSEVEN
   // drawId: draw ID to close
   // randomness: random value from VRF or other source
   
@@ -497,10 +497,10 @@ function unpackEasyLottoNumbers(packed) {
 ### 3. Pack SuperSeven Columns
 
 ```javascript
-function packSuperSeteColumns(columns) {
+function packSuperSevenColumns(columns) {
   // columns: array of 7 digits (0-9)
   if (columns.length !== 7) {
-    throw new Error("SuperSete requires exactly 7 columns");
+    throw new Error("SuperSeven requires exactly 7 columns");
   }
   
   let packed = 0;
@@ -514,10 +514,10 @@ function packSuperSeteColumns(columns) {
 }
 ```
 
-### 4. Unpack SuperSete Columns
+### 4. Unpack SuperSeven Columns
 
 ```javascript
-function unpackSuperSeteColumns(packed) {
+function unpackSuperSevenColumns(packed) {
   const columns = [];
   for (let i = 0; i < 7; i++) {
     const digit = (packed >> (i * 4)) & 0x0F;
@@ -540,7 +540,7 @@ function listenForTicketPurchases() {
     console.log("New ticket purchased!");
     console.log("- Ticket ID:", ticketId.toString());
     console.log("- Player:", player);
-    console.log("- Game:", game === 0 ? "SuperSete" : "EasyLotto");
+  console.log("- Game:", game === 1 ? "SuperSeven" : "EasyLotto");
     console.log("- Draw ID:", drawId);
     console.log("- Payment:", ethers.utils.formatEther(paymentAmount));
     console.log("- Agent:", agent);
@@ -557,7 +557,7 @@ function listenForDrawCompletions() {
   
   cryptoDraw.on("DrawCompleted", (game, drawId, winningNumbers) => {
     console.log("Draw completed!");
-    console.log("- Game:", game === 0 ? "SuperSete" : "EasyLotto");
+  console.log("- Game:", game === 1 ? "SuperSeven" : "EasyLotto");
     console.log("- Draw ID:", drawId);
     console.log("- Winning numbers (packed):", winningNumbers);
     
@@ -565,8 +565,8 @@ function listenForDrawCompletions() {
     if (game === 1) { // EasyLotto
       const numbers = unpackEasyLottoNumbers(winningNumbers);
       console.log("- Numbers:", numbers.join(", "));
-    } else { // SuperSete
-      const columns = unpackSuperSeteColumns(winningNumbers);
+    } else { // SuperSeven
+      const columns = unpackSuperSevenColumns(winningNumbers);
       console.log("- Columns:", columns.join(", "));
     }
   });

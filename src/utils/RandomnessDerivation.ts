@@ -9,10 +9,10 @@ import { NumberPacking } from './NumberPacking';
 
 export class RandomnessDerivation {
   /**
-   * Deriva números vencedores do Lotofácil a partir do randomness
+   * Deriva números vencedores do EasyLotto a partir do randomness
    * Seleciona 15 números únicos no range 1-25
    */
-  static deriveLotofacilWinning(randomness: string): number[] {
+  static deriveEasyLottoWinning(randomness: string): number[] {
     const numbers: number[] = [];
     const randomBytes = this.hexToBytes(randomness);
     
@@ -37,17 +37,17 @@ export class RandomnessDerivation {
     }
     
     if (numbers.length < 15) {
-      throw new Error('Falha ao derivar números suficientes do randomness');
+  throw new Error('Falha ao derivar números suficientes do randomness');
     }
     
     return numbers.sort((a, b) => a - b);
   }
 
   /**
-   * Deriva números vencedores do SuperSete a partir do randomness
+   * Deriva números vencedores do SuperSeven a partir do randomness
    * Seleciona 7 dígitos no range 0-9
    */
-  static deriveSuperseteWinning(randomness: string): number[] {
+  static deriveSuperSevenWinning(randomness: string): number[] {
     const columns: number[] = [];
     const randomBytes = this.hexToBytes(randomness);
     
@@ -72,10 +72,10 @@ export class RandomnessDerivation {
    */
   static deriveWinningNumbers(randomness: string, game: GameType): number[] {
     switch (game) {
-      case GameType.LOTOFACIL:
-        return this.deriveLotofacilWinning(randomness);
-      case GameType.SUPERSETE:
-        return this.deriveSuperseteWinning(randomness);
+      case GameType.EASYLOTTO:
+        return this.deriveEasyLottoWinning(randomness);
+      case GameType.SUPERSEVEN:
+        return this.deriveSuperSevenWinning(randomness);
       default:
         throw new Error(`Tipo de jogo não suportado: ${game}`);
     }
@@ -124,34 +124,38 @@ export class RandomnessDerivation {
    * Calcula estatísticas de distribuição dos números derivados
    */
   static analyzeRandomness(randomness: string, iterations: number = 1000): {
-    lotofacil: { [key: number]: number };
-    supersete: { [key: number]: number };
+    easyLotto: { [key: number]: number };
+    superSeven: { [key: number]: number };
   } {
-    const lotofacilFreq: { [key: number]: number } = {};
-    const superseteFreq: { [key: number]: number } = {};
+    const easyLottoFreq: { [key: number]: number } = {};
+    const superSevenFreq: { [key: number]: number } = {};
     
     // Inicializa contadores
-    for (let i = 1; i <= 25; i++) lotofacilFreq[i] = 0;
-    for (let i = 0; i <= 9; i++) superseteFreq[i] = 0;
+  for (let i = 1; i <= 25; i++) easyLottoFreq[i] = 0;
+  for (let i = 0; i <= 9; i++) superSevenFreq[i] = 0;
     
     for (let iteration = 0; iteration < iterations; iteration++) {
       // Modifica randomness para cada iteração
       const modifiedRandomness = this.modifyRandomness(randomness, iteration);
       
-      // Analisa Lotofácil
-      const lotofacilNumbers = this.deriveLotofacilWinning(modifiedRandomness);
-      lotofacilNumbers.forEach(num => lotofacilFreq[num]++);
+      // Analisa EasyLotto
+      const easyLottoNumbers = this.deriveEasyLottoWinning(modifiedRandomness);
+      easyLottoNumbers.forEach(num => easyLottoFreq[num]++);
       
-      // Analisa SuperSete
-      const superseteNumbers = this.deriveSuperseteWinning(modifiedRandomness);
-      superseteNumbers.forEach(num => superseteFreq[num]++);
+      // Analisa SuperSeven
+      const superSevenNumbers = this.deriveSuperSevenWinning(modifiedRandomness);
+      superSevenNumbers.forEach(num => superSevenFreq[num]++);
     }
     
     return {
-      lotofacil: lotofacilFreq,
-      supersete: superseteFreq
+      easyLotto: easyLottoFreq,
+      superSeven: superSevenFreq
     };
   }
+
+  // Aliases legados para compatibilidade
+  static deriveLotofacilWinning(randomness: string): number[] { return this.deriveEasyLottoWinning(randomness); }
+  static deriveSuperseteWinning(randomness: string): number[] { return this.deriveSuperSevenWinning(randomness); }
 
   /**
    * Utilitários privados
