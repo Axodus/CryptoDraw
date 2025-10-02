@@ -24,8 +24,8 @@ describe("CryptoDraw Contract", function () {
     const priceOracle = await PriceOracleMock.deploy();
     
     // Deploy TicketNFT
-    const TicketNFT = await ethers.getContractFactory("TicketNFT");
-    const ticketNFT = await TicketNFT.deploy();
+  const TicketNFT = await ethers.getContractFactory("TicketNFT");
+  const ticketNFT = await TicketNFT.deploy();
     
       // Use fully qualified contract name because project contains CryptoDraw and CryptoDrawV2
       const CryptoDraw = await ethers.getContractFactory("contracts/CryptoDraw.sol:CryptoDraw");
@@ -37,8 +37,8 @@ describe("CryptoDraw Contract", function () {
       priceOracle.address
     );
     
-    // Configure contracts
-    await ticketNFT.setMinter(cryptoDraw.address);
+  // Configure contracts
+  await ticketNFT.setCryptoDrawAddress(cryptoDraw.address);
     await vrfCoordinator.addConsumer(subId, cryptoDraw.address);
     
     // Setup game configs

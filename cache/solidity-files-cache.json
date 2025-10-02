@@ -87,45 +87,6 @@
         "ITicketNFT"
       ]
     },
-    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
-      "lastModificationDate": 1759401808415,
-      "contentHash": "5a20b2cad87ddb61c7a3a6af21289e28",
-      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
-      "solcConfig": {
-        "version": "0.8.18",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../utils/Context.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Ownable"
-      ]
-    },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/access/AccessControl.sol": {
       "lastModificationDate": 1759401804721,
       "contentHash": "a2b1ec38a8dad325a596f926890772b8",
@@ -166,6 +127,45 @@
       ],
       "artifacts": [
         "AccessControl"
+      ]
+    },
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
+      "lastModificationDate": 1759401808415,
+      "contentHash": "5a20b2cad87ddb61c7a3a6af21289e28",
+      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Ownable"
       ]
     },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol": {
@@ -279,43 +279,6 @@
         "VRFCoordinatorV2Interface"
       ]
     },
-    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@chainlink+contracts@0.8.0_bufferutil@4.0.5_ethers@5.8.0_bufferutil@4.0.5_utf-8-validate@5.0.7__utf-8-validate@5.0.7/node_modules/@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol": {
-      "lastModificationDate": 1759401405766,
-      "contentHash": "eb9cc526ef59dfc4d644f56ddca0633a",
-      "sourceName": "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol",
-      "solcConfig": {
-        "version": "0.8.18",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "VRFConsumerBaseV2"
-      ]
-    },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@chainlink+contracts@0.8.0_bufferutil@4.0.5_ethers@5.8.0_bufferutil@4.0.5_utf-8-validate@5.0.7__utf-8-validate@5.0.7/node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol": {
       "lastModificationDate": 1759401379210,
       "contentHash": "29c520cd24ad9a3f2c9cf285fee25f05",
@@ -351,6 +314,43 @@
       ],
       "artifacts": [
         "AggregatorV3Interface"
+      ]
+    },
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@chainlink+contracts@0.8.0_bufferutil@4.0.5_ethers@5.8.0_bufferutil@4.0.5_utf-8-validate@5.0.7__utf-8-validate@5.0.7/node_modules/@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol": {
+      "lastModificationDate": 1759401405766,
+      "contentHash": "eb9cc526ef59dfc4d644f56ddca0633a",
+      "sourceName": "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "VRFConsumerBaseV2"
       ]
     },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@chainlink+contracts@0.8.0_bufferutil@4.0.5_ethers@5.8.0_bufferutil@4.0.5_utf-8-validate@5.0.7__utf-8-validate@5.0.7/node_modules/@chainlink/contracts/src/v0.8/automation/interfaces/KeeperCompatibleInterface.sol": {
@@ -691,10 +691,10 @@
         "AutomationCompatibleInterface"
       ]
     },
-    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol": {
-      "lastModificationDate": 1759401808510,
-      "contentHash": "1b5d667d3740d866eca0352758e59827",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/contracts/mocks/Mocks.sol": {
+      "lastModificationDate": 1759404832815,
+      "contentHash": "4d9793a0f4ea2ad3f34d3ca39d4c8e2e",
+      "sourceName": "contracts/mocks/Mocks.sol",
       "solcConfig": {
         "version": "0.8.18",
         "settings": {
@@ -721,21 +721,21 @@
         }
       },
       "imports": [
-        "../IERC20.sol",
-        "../extensions/IERC20Permit.sol",
-        "../../../utils/Address.sol"
+        "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol"
       ],
       "versionPragmas": [
-        "^0.8.0"
+        "^0.8.18"
       ],
       "artifacts": [
-        "SafeERC20"
+        "CryptoDrawMock",
+        "PriceOracleMock",
+        "VRFCoordinatorV2Mock"
       ]
     },
-    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/utils/Address.sol": {
-      "lastModificationDate": 1759401804791,
-      "contentHash": "211ffd288c1588ba8c10eae668ca3c66",
-      "sourceName": "@openzeppelin/contracts/utils/Address.sol",
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol": {
+      "lastModificationDate": 1759401807491,
+      "contentHash": "909ab67fc5c25033fe6cd364f8c056f9",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
       "solcConfig": {
         "version": "0.8.18",
         "settings": {
@@ -761,18 +761,20 @@
           }
         }
       },
-      "imports": [],
+      "imports": [
+        "../IERC20.sol"
+      ],
       "versionPragmas": [
-        "^0.8.1"
+        "^0.8.0"
       ],
       "artifacts": [
-        "Address"
+        "IERC20Metadata"
       ]
     },
-    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol": {
-      "lastModificationDate": 1759401807508,
-      "contentHash": "525fcdad8d171312933f47baf01d1ed8",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol",
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol": {
+      "lastModificationDate": 1759401806123,
+      "contentHash": "3ae5166c6827a9cf1a7a462d1632b464",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
       "solcConfig": {
         "version": "0.8.18",
         "settings": {
@@ -798,12 +800,56 @@
           }
         }
       },
-      "imports": [],
+      "imports": [
+        "./IERC20.sol",
+        "./extensions/IERC20Metadata.sol",
+        "../../utils/Context.sol"
+      ],
       "versionPragmas": [
         "^0.8.0"
       ],
       "artifacts": [
-        "IERC20Permit"
+        "ERC20"
+      ]
+    },
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol": {
+      "lastModificationDate": 1759401806542,
+      "contentHash": "5a341bfc4fe3ee5357ccdebd3a78ad2c",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../ERC721.sol",
+        "../../../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC721Burnable"
       ]
     },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol": {
@@ -851,10 +897,10 @@
         "ERC721"
       ]
     },
-    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol": {
-      "lastModificationDate": 1759401807717,
-      "contentHash": "48de4c9a3a4ae5ef66a2aa620843413f",
-      "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/utils/Address.sol": {
+      "lastModificationDate": 1759401804791,
+      "contentHash": "211ffd288c1588ba8c10eae668ca3c66",
+      "sourceName": "@openzeppelin/contracts/utils/Address.sol",
       "solcConfig": {
         "version": "0.8.18",
         "settings": {
@@ -880,14 +926,12 @@
           }
         }
       },
-      "imports": [
-        "../../utils/introspection/IERC165.sol"
-      ],
+      "imports": [],
       "versionPragmas": [
-        "^0.8.0"
+        "^0.8.1"
       ],
       "artifacts": [
-        "IERC721"
+        "Address"
       ]
     },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol": {
@@ -927,6 +971,45 @@
         "IERC721Receiver"
       ]
     },
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol": {
+      "lastModificationDate": 1759401807717,
+      "contentHash": "48de4c9a3a4ae5ef66a2aa620843413f",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/introspection/IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC721"
+      ]
+    },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
       "lastModificationDate": 1759401807948,
       "contentHash": "efbc0d15b80a74e34dbe8da0f3e879bb",
@@ -964,85 +1047,6 @@
       ],
       "artifacts": [
         "IERC721Metadata"
-      ]
-    },
-    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol": {
-      "lastModificationDate": 1759401806542,
-      "contentHash": "5a341bfc4fe3ee5357ccdebd3a78ad2c",
-      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol",
-      "solcConfig": {
-        "version": "0.8.18",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../ERC721.sol",
-        "../../../utils/Context.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "ERC721Burnable"
-      ]
-    },
-    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/security/Pausable.sol": {
-      "lastModificationDate": 1759401808415,
-      "contentHash": "25c8108f36fdd472bc78d4c4af240c11",
-      "sourceName": "@openzeppelin/contracts/security/Pausable.sol",
-      "solcConfig": {
-        "version": "0.8.18",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../utils/Context.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Pausable"
       ]
     },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/contracts/CryptoDrawV2.sol": {
@@ -1091,6 +1095,43 @@
         "ITicketNFTv2"
       ]
     },
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/contracts/GameLibrary.sol": {
+      "lastModificationDate": 1759325479656,
+      "contentHash": "755e1e9030a3c40bc448042cf97969b0",
+      "sourceName": "contracts/GameLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.18"
+      ],
+      "artifacts": [
+        "GameLibrary"
+      ]
+    },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/contracts/PriceOracle.sol": {
       "lastModificationDate": 1759325479660,
       "contentHash": "61f142b7f8c06448855a175fbe614190",
@@ -1131,10 +1172,90 @@
         "PriceOracle"
       ]
     },
-    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/contracts/GameLibrary.sol": {
-      "lastModificationDate": 1759325479656,
-      "contentHash": "755e1e9030a3c40bc448042cf97969b0",
-      "sourceName": "contracts/GameLibrary.sol",
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/security/Pausable.sol": {
+      "lastModificationDate": 1759401808415,
+      "contentHash": "25c8108f36fdd472bc78d4c4af240c11",
+      "sourceName": "@openzeppelin/contracts/security/Pausable.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Pausable"
+      ]
+    },
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol": {
+      "lastModificationDate": 1759401808510,
+      "contentHash": "1b5d667d3740d866eca0352758e59827",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC20.sol",
+        "../extensions/IERC20Permit.sol",
+        "../../../utils/Address.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SafeERC20"
+      ]
+    },
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/node_modules/.pnpm/@openzeppelin+contracts@4.9.6/node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol": {
+      "lastModificationDate": 1759401807508,
+      "contentHash": "525fcdad8d171312933f47baf01d1ed8",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol",
       "solcConfig": {
         "version": "0.8.18",
         "settings": {
@@ -1162,10 +1283,10 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.18"
+        "^0.8.0"
       ],
       "artifacts": [
-        "GameLibrary"
+        "IERC20Permit"
       ]
     },
     "/mnt/d/Rede/Github/mzfshark/CryptoDraw/contracts/TicketNFT.sol": {
@@ -1247,10 +1368,10 @@
         "Counters"
       ]
     },
-    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/contracts/mocks/Mocks.sol": {
-      "lastModificationDate": 1759404803707,
-      "contentHash": "4d9793a0f4ea2ad3f34d3ca39d4c8e2e",
-      "sourceName": "contracts/mocks/Mocks.sol",
+    "/mnt/d/Rede/Github/mzfshark/CryptoDraw/contracts/mocks/MockToken.sol": {
+      "lastModificationDate": 1759419617732,
+      "contentHash": "039ab4da3168b4ee4425ae596888b12f",
+      "sourceName": "contracts/mocks/MockToken.sol",
       "solcConfig": {
         "version": "0.8.18",
         "settings": {
@@ -1277,15 +1398,13 @@
         }
       },
       "imports": [
-        "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol"
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol"
       ],
       "versionPragmas": [
         "^0.8.18"
       ],
       "artifacts": [
-        "CryptoDrawMock",
-        "PriceOracleMock",
-        "VRFCoordinatorV2Mock"
+        "MockToken"
       ]
     }
   }
