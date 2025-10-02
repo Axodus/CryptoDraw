@@ -2,7 +2,7 @@
 
 ## 🎯 Overview
 
-Complete smart contract implementation for CryptoDraw lottery system on Harmony blockchain, featuring two game types: **SuperSete** and **EasyLotto** (Lotofácil rebrand).
+Complete smart contract implementation for CryptoDraw lottery system on Harmony blockchain, featuring two game types: **SuperSeven** and **EasyLotto** (Lotofácil rebrand).
 
 ## 🚀 Quick Start
 
@@ -49,13 +49,13 @@ npx hardhat run scripts/deploy-harmony.js --network harmony
 
 ## 🎮 Supported Games
 
-### 1. SuperSete
+### 1. SuperSeven
 - **Numbers**: 7 columns, each 0-9
 - **Storage**: 28 bits (7×4-bit nibbles)
 - **Prizes**: 3-7 column matches
 - **Interval**: 1 week (configurable)
 
-### 2. EasyLotto (Lotofácil)
+### 2. EasyLotto (formerly Lotofácil)
 - **Numbers**: 15-20 from 1-25
 - **Storage**: 25-bit bitmask
 - **Prizes**: 11-15 matches
@@ -267,7 +267,7 @@ Built with:
 ## Version History
 
 ### v2.0.0 (Current)
-- Multi-game support (SuperSete + EasyLotto)
+- Multi-game support (SuperSeven + EasyLotto)
 - Multi-token payment system
 - Comprehensive admin controls
 - Enhanced security features

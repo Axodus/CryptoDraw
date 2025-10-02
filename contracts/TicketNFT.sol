@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 /**
  * @title TicketNFT
  * @dev NFT não-transferível representando tickets da loteria CryptoDraw
- * @notice Suporta dois tipos de jogos: SuperSete e EasyLotto (Lotofácil)
+ * @notice Suporta dois tipos de jogos: SuperSeven e EasyLotto (Lotofácil)
  */
 contract TicketNFT is ERC721, Ownable, ERC721Burnable {
     using Counters for Counters.Counter;
@@ -24,7 +24,7 @@ contract TicketNFT is ERC721, Ownable, ERC721Burnable {
     // ============ ENUMS ============
     
     enum GameType {
-        SUPERSETE,    // 0: SuperSete (7 colunas, 0-9)
+    SUPERSEVEN,   // 0: SuperSeven (7 colunas, 0-9)
         EASYLOTTO     // 1: EasyLotto/Lotofácil (15 números de 1-25)
     }
     
@@ -264,7 +264,7 @@ contract TicketNFT is ERC721, Ownable, ERC721Burnable {
 
         Ticket memory ticket = _tickets[tokenId];
         
-        string memory gameName = ticket.game == GameType.SUPERSETE ? "SuperSete" : "EasyLotto";
+    string memory gameName = ticket.game == GameType.SUPERSEVEN ? "SuperSeven" : "EasyLotto";
         string memory statusName = _getStatusName(ticket.status);
         
         // Gera o nome do token como "#123456789"

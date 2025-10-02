@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 /**
  * @title GameLibrary
- * @dev Biblioteca para manipulação de números dos jogos SuperSete e EasyLotto
+ * @dev Biblioteca para manipulação de números dos jogos SuperSeven e EasyLotto
  * @notice Implementa packing/unpacking e validação conforme especificação
  */
 library GameLibrary {
@@ -22,10 +22,10 @@ library GameLibrary {
     uint8 public constant EASYLOTTO_MIN_VALUE = 1;
     uint8 public constant EASYLOTTO_MAX_VALUE = 25;
     
-    // SuperSete: 7 colunas com dígitos 0-9
-    uint8 public constant SUPERSETE_COLUMNS = 7;
-    uint8 public constant SUPERSETE_MIN_VALUE = 0;
-    uint8 public constant SUPERSETE_MAX_VALUE = 9;
+    // SuperSeven: 7 colunas com dígitos 0-9
+    uint8 public constant SUPERSEVEN_COLUMNS = 7;
+    uint8 public constant SUPERSEVEN_MIN_VALUE = 0;
+    uint8 public constant SUPERSEVEN_MAX_VALUE = 9;
     
     // ============ EASYLOTTO FUNCTIONS ============
     
@@ -150,26 +150,26 @@ library GameLibrary {
         return count;
     }
     
-    // ============ SUPERSETE FUNCTIONS ============
+    // ============ SUPERSEVEN FUNCTIONS ============
     
     /**
-     * @dev Valida números do SuperSete
+     * @dev Valida números do SuperSeven
      * @param columns Array de 7 dígitos (0-9)
      * @return valid Se os números são válidos
      */
-    function validateSuperSeteNumbers(uint8[] memory columns) 
+    function validateSuperSevenNumbers(uint8[] memory columns) 
         internal 
         pure 
         returns (bool valid) 
     {
         // Deve ter exatamente 7 colunas
-        if (columns.length != SUPERSETE_COLUMNS) {
+        if (columns.length != SUPERSEVEN_COLUMNS) {
             return false;
         }
         
         // Cada coluna deve estar entre 0-9
-        for (uint256 i = 0; i < SUPERSETE_COLUMNS; i++) {
-            if (columns[i] > SUPERSETE_MAX_VALUE) {
+        for (uint256 i = 0; i < SUPERSEVEN_COLUMNS; i++) {
+            if (columns[i] > SUPERSEVEN_MAX_VALUE) {
                 return false;
             }
         }
@@ -178,21 +178,21 @@ library GameLibrary {
     }
     
     /**
-     * @dev Empacota números do SuperSete em uint32 (7 colunas × 4 bits = 28 bits)
+     * @dev Empacota números do SuperSeven em uint32 (7 colunas × 4 bits = 28 bits)
      * @param columns Array de 7 dígitos (0-9)
      * @return packed Números empacotados em uint32
      */
-    function packSuperSeteNumbers(uint8[] memory columns) 
+    function packSuperSevenNumbers(uint8[] memory columns) 
         internal 
         pure 
         returns (uint32 packed) 
     {
-        if (!validateSuperSeteNumbers(columns)) {
+        if (!validateSuperSevenNumbers(columns)) {
             revert InvalidNumber();
         }
         
         packed = 0;
-        for (uint8 i = 0; i < SUPERSETE_COLUMNS; i++) {
+        for (uint8 i = 0; i < SUPERSEVEN_COLUMNS; i++) {
             // Cada coluna usa 4 bits
             // Coluna 1 = bits 0-3, Coluna 2 = bits 4-7, etc.
             packed |= uint32(columns[i]) << (i * 4);
@@ -202,23 +202,23 @@ library GameLibrary {
     }
     
     /**
-     * @dev Desempacota números do SuperSete de uint32
+     * @dev Desempacota números do SuperSeven de uint32
      * @param packed Números empacotados
      * @return columns Array de 7 dígitos desempacotados
      */
-    function unpackSuperSeteNumbers(uint32 packed) 
+    function unpackSuperSevenNumbers(uint32 packed) 
         internal 
         pure 
         returns (uint8[] memory columns) 
     {
-        columns = new uint8[](SUPERSETE_COLUMNS);
+        columns = new uint8[](SUPERSEVEN_COLUMNS);
         
-        for (uint8 i = 0; i < SUPERSETE_COLUMNS; i++) {
+        for (uint8 i = 0; i < SUPERSEVEN_COLUMNS; i++) {
             // Extrai 4 bits para cada coluna
             columns[i] = uint8((packed >> (i * 4)) & 0x0F);
             
             // Valida que o valor está no range 0-9
-            if (columns[i] > SUPERSETE_MAX_VALUE) {
+            if (columns[i] > SUPERSEVEN_MAX_VALUE) {
                 revert InvalidPackedData();
             }
         }
@@ -227,19 +227,19 @@ library GameLibrary {
     }
     
     /**
-     * @dev Conta acertos do SuperSete (quantas colunas batem)
+     * @dev Conta acertos do SuperSeven (quantas colunas batem)
      * @param packed1 Primeiro conjunto empacotado
      * @param packed2 Segundo conjunto empacotado
      * @return count Quantidade de colunas que batem
      */
-    function countSuperSeteMatches(uint32 packed1, uint32 packed2) 
+    function countSuperSevenMatches(uint32 packed1, uint32 packed2) 
         internal 
         pure 
         returns (uint8 count) 
     {
         count = 0;
         
-        for (uint8 i = 0; i < SUPERSETE_COLUMNS; i++) {
+        for (uint8 i = 0; i < SUPERSEVEN_COLUMNS; i++) {
             // Extrai o dígito de cada coluna
             uint8 digit1 = uint8((packed1 >> (i * 4)) & 0x0F);
             uint8 digit2 = uint8((packed2 >> (i * 4)) & 0x0F);
@@ -287,12 +287,12 @@ library GameLibrary {
     }
     
     /**
-     * @dev Gera números vencedores do SuperSete deterministicamente
+     * @dev Gera números vencedores do SuperSeven deterministicamente
      * @param randomness Valor de randomness do VRF
      * @param drawId ID do sorteio (para entropia adicional)
      * @return packed Números vencedores empacotados
      */
-    function generateSuperSeteWinning(uint256 randomness, uint32 drawId) 
+    function generateSuperSevenWinning(uint256 randomness, uint32 drawId) 
         internal 
         pure 
         returns (uint32 packed) 
@@ -301,7 +301,7 @@ library GameLibrary {
         packed = 0;
         
         // Gera 7 dígitos de 0-9
-        for (uint8 col = 0; col < SUPERSETE_COLUMNS; col++) {
+        for (uint8 col = 0; col < SUPERSEVEN_COLUMNS; col++) {
             seed = uint256(keccak256(abi.encodePacked(seed, col)));
             uint8 digit = uint8(seed % 10); // 0-9
             packed |= uint32(digit) << (col * 4);

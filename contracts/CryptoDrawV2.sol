@@ -10,7 +10,7 @@ import "./GameLibrary.sol";
 import "./PriceOracle.sol";
 
 interface ITicketNFTv2 {
-    enum GameType { SUPERSETE, EASYLOTTO }
+    enum GameType { SUPERSEVEN, EASYLOTTO }
     enum TicketStatus { ACTIVE, EXPIRED, REDEEMED, BURNED }
     
     function mint(
@@ -38,7 +38,7 @@ interface ITicketNFTv2 {
 /**
  * @title CryptoDraw
  * @dev Contrato principal do sistema de loteria CryptoDraw
- * @notice Suporta dois jogos: SuperSete e EasyLotto (Lotofácil) na blockchain Harmony
+ * @notice Suporta dois jogos: SuperSeven e EasyLotto (Lotofácil) na blockchain Harmony
  */
 contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -53,7 +53,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
     
     // ============ ENUMS ============
     
-    enum GameType { SUPERSETE, EASYLOTTO }
+    enum GameType { SUPERSEVEN, EASYLOTTO }
     
     enum DrawStatus {
         SCHEDULED,           // Sorteio agendado
@@ -202,7 +202,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         });
         
         // Configuração inicial dos jogos
-        gameConfigs[GameType.SUPERSETE] = GameConfig({
+    gameConfigs[GameType.SUPERSEVEN] = GameConfig({
             ticketPriceUSD: 1 * 10**18,  // $1.00
             drawInterval: 1 weeks,
             lastDrawTime: block.timestamp,
@@ -251,8 +251,8 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
             if (!GameLibrary.validateEasyLottoNumbers(numbers)) revert InvalidNumbers();
             numbersPacked = GameLibrary.packEasyLottoNumbers(numbers);
         } else {
-            if (!GameLibrary.validateSuperSeteNumbers(numbers)) revert InvalidNumbers();
-            numbersPacked = GameLibrary.packSuperSeteNumbers(numbers);
+            if (!GameLibrary.validateSuperSevenNumbers(numbers)) revert InvalidNumbers();
+            numbersPacked = GameLibrary.packSuperSevenNumbers(numbers);
         }
         
         // Calcula pagamento
@@ -324,7 +324,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         if (game == GameType.EASYLOTTO) {
             draw.winningNumbersPacked = GameLibrary.generateEasyLottoWinning(randomness, drawId);
         } else {
-            draw.winningNumbersPacked = GameLibrary.generateSuperSeteWinning(randomness, drawId);
+            draw.winningNumbersPacked = GameLibrary.generateSuperSevenWinning(randomness, drawId);
         }
         
         draw.status = DrawStatus.COMPLETED;
@@ -383,7 +383,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         if (game == GameType.EASYLOTTO) {
             matches = GameLibrary.countEasyLottoMatches(numbersPacked, draw.winningNumbersPacked);
         } else {
-            matches = GameLibrary.countSuperSeteMatches(numbersPacked, draw.winningNumbersPacked);
+            matches = GameLibrary.countSuperSevenMatches(numbersPacked, draw.winningNumbersPacked);
         }
         
         // Calcula prêmio baseado nos acertos
@@ -649,7 +649,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
             if (matches == 12) return (totalPool * 1000) / 10000; // 10%
             if (matches == 11) return (totalPool * 500) / 10000;  // 5%
         } else {
-            // SuperSete: prêmios por colunas acertadas
+            // SuperSeven: prêmios por colunas acertadas
             if (matches == 7) return (totalPool * 5000) / 10000; // 50%
             if (matches == 6) return (totalPool * 2000) / 10000; // 20%
             if (matches == 5) return (totalPool * 1500) / 10000; // 15%
