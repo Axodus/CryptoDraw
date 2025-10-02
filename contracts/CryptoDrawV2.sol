@@ -339,20 +339,7 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
     /**
      * @dev Compat: fecha um sorteio mudando para estado CLOSED e emite DrawClosed (sem gerar vencedores)
      *      Usado por testes legados que esperam dois estágios (CLOSED -> COMPLETED)
-     */
-    function closeDraw(GameType game, uint32 drawId)
-        public
-        onlyRole(OPERATOR_ROLE)
-    {
-        Draw storage draw = draws[game][drawId];
-        require(draw.status == DrawStatus.OPEN, "Draw not open");
-        draw.status = DrawStatus.CLOSED;
-        draw.closedAt = block.timestamp;
-        emit DrawClosed(game, drawId);
-    }
-
-    /**
-     * @dev Compat: alias semântica usada nos testes atuais para fechamento simples
+     *      Nome distinto para evitar ambiguidade de overload em ethers v5
      */
     function closeDrawSimple(GameType game, uint32 drawId)
         public
@@ -364,6 +351,8 @@ contract CryptoDraw is AccessControl, ReentrancyGuard, Pausable {
         draw.closedAt = block.timestamp;
         emit DrawClosed(game, drawId);
     }
+
+    
     
     // ============ EXTERNAL FUNCTIONS - PRIZE CLAIM ============
     
