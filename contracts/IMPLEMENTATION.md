@@ -131,11 +131,11 @@ Library for number packing, validation, and winning generation.
 
 **SuperSete Functions:**
 - **Format**: 7 columns of 0-9, packed as 7×4-bit nibbles (28 bits)
-- `validateSuperSeteNumbers(uint8[] columns)` - Validates column selection
-- `packSuperSeteNumbers(uint8[] columns)` - Packs into uint32
-- `unpackSuperSeteNumbers(uint32 packed)` - Unpacks from uint32
-- `countSuperSeteMatches(uint32, uint32)` - Counts matching columns
-- `generateSuperSeteWinning(uint256 randomness, uint32 drawId)` - Generates winners
+- `validateSuperSevenNumbers(uint8[] columns)` - Validates column selection
+- `packSuperSevenNumbers(uint8[] columns)` - Packs into uint32
+- `unpackSuperSevenNumbers(uint32 packed)` - Unpacks from uint32
+- `countSuperSevenMatches(uint32, uint32)` - Counts matching columns
+- `generateSuperSevenWinning(uint256 randomness, uint32 drawId)` - Generates winners
 
 ## Game Specifications
 

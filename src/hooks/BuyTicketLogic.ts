@@ -118,22 +118,22 @@ export function validateBuyTicketParams(params: BuyTicketParams): string | null 
 
   if (params.game === GameType.EASYLOTTO) {
     if (params.numbers.length !== 15) {
-      return 'Lotofácil deve ter exatamente 15 números';
+  return 'EasyLotto deve ter exatamente 15 números';
     }
     
     for (const num of params.numbers) {
       if (num < 1 || num > 25) {
-        return 'Números da Lotofácil devem estar entre 1 e 25';
+  return 'Números do EasyLotto devem estar entre 1 e 25';
       }
     }
   } else if (params.game === GameType.SUPERSEVEN) {
     if (params.numbers.length !== 7) {
-      return 'SuperSete deve ter exatamente 7 números';
+  return 'SuperSeven deve ter exatamente 7 números';
     }
     
     for (const num of params.numbers) {
       if (num < 0 || num > 9) {
-        return 'Números do SuperSete devem estar entre 0 e 9';
+  return 'Números do SuperSeven devem estar entre 0 e 9';
       }
     }
   } else {
@@ -249,7 +249,7 @@ export class NumberValidator {
       }
     }
 
-    // Validar números únicos (só para Lotofácil)
+  // Validar números únicos (só para EasyLotto)
   if (game === GameType.EASYLOTTO) {
       const uniqueNumbers = new Set(numbers);
       if (uniqueNumbers.size !== numbers.length) {

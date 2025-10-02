@@ -30,8 +30,8 @@ async function buyEasyLottoTicket() {
   const signer = provider.getSigner();
   const cryptoDraw = new ethers.Contract(CRYPTO_DRAW_ADDRESS, CryptoDrawABI, signer);
   
-  // Game type: 0 = EASYLOTTO, 1 = SUPERSEVEN
-  const gameType = 0; // EasyLotto
+  // Game type: 0 = SUPERSEVEN, 1 = EASYLOTTO
+  const gameType = 1; // EasyLotto
   
   // Select 15 numbers from 1-25
   const numbers = [1, 2, 3, 5, 7, 11, 13, 15, 17, 19, 21, 22, 23, 24, 25];
@@ -85,7 +85,7 @@ async function buySuperSevenTicket() {
   const cryptoDraw = new ethers.Contract(CRYPTO_DRAW_ADDRESS, CryptoDrawABI, signer);
   
   // Game type: SUPERSEVEN
-  const gameType = 1;
+  const gameType = 0;
   
   // Select 7 columns (0-9 each)
   const columns = [3, 0, 9, 7, 1, 2, 4];
@@ -139,7 +139,7 @@ async function getTicketInfo(ticketId) {
   
   console.log("Ticket Info:");
   console.log("- Player:", ticket.player);
-  console.log("- Game:", ticket.game === 0 ? "EasyLotto" : "SuperSeven");
+  console.log("- Game:", ticket.game === 0 ? "SuperSeven" : "EasyLotto");
   console.log("- Numbers (packed):", ticket.numbersPacked);
   console.log("- Draw Round:", ticket.drawRound.toString());
   console.log("- Rounds Bought:", ticket.roundsBought);
@@ -354,7 +354,7 @@ async function configureGame(gameType, ticketPriceUSD, drawInterval, enabled) {
   const signer = provider.getSigner();
   const cryptoDraw = new ethers.Contract(CRYPTO_DRAW_ADDRESS, CryptoDrawABI, signer);
   
-  // gameType: 0 = EASYLOTTO, 1 = SUPERSEVEN
+  // gameType: 0 = SUPERSEVEN, 1 = EASYLOTTO
   // ticketPriceUSD: in 18 decimals (e.g., ethers.utils.parseEther("2.0"))
   // drawInterval: in seconds (e.g., 7 * 24 * 60 * 60 for 1 week)
   // enabled: boolean
@@ -540,7 +540,7 @@ function listenForTicketPurchases() {
     console.log("New ticket purchased!");
     console.log("- Ticket ID:", ticketId.toString());
     console.log("- Player:", player);
-  console.log("- Game:", game === 1 ? "SuperSeven" : "EasyLotto");
+  console.log("- Game:", game === 0 ? "SuperSeven" : "EasyLotto");
     console.log("- Draw ID:", drawId);
     console.log("- Payment:", ethers.utils.formatEther(paymentAmount));
     console.log("- Agent:", agent);
@@ -557,7 +557,7 @@ function listenForDrawCompletions() {
   
   cryptoDraw.on("DrawCompleted", (game, drawId, winningNumbers) => {
     console.log("Draw completed!");
-  console.log("- Game:", game === 1 ? "SuperSeven" : "EasyLotto");
+  console.log("- Game:", game === 0 ? "SuperSeven" : "EasyLotto");
     console.log("- Draw ID:", drawId);
     console.log("- Winning numbers (packed):", winningNumbers);
     

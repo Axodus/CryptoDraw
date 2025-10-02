@@ -263,7 +263,7 @@ export class TicketController {
 
   if (game === GameType.EASYLOTTO) {
       if (numbers.length !== 15) {
-        errors.push('Lotofácil deve ter exatamente 15 números');
+  errors.push('EasyLotto deve ter exatamente 15 números');
       }
       
       if (numbers.some(n => n < 1 || n > 25)) {
@@ -275,7 +275,7 @@ export class TicketController {
       }
   } else if (game === GameType.SUPERSEVEN) {
       if (numbers.length !== 7) {
-        errors.push('SuperSete deve ter exatamente 7 colunas');
+  errors.push('SuperSeven deve ter exatamente 7 colunas');
       }
       
       if (numbers.some(n => n < 0 || n > 9)) {

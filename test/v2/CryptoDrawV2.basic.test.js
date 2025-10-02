@@ -52,7 +52,7 @@ describe('CryptoDrawV2 (current API) - basic flows', function () {
   it('configures game and buys a ticket with ONE (native)', async function () {
     const { cryptoDraw, operator, user, ticketNFT } = await deployFixture();
 
-  // Configure SuperSeven (1) — Nota: enum no contrato agora é SUPERSEVEN=1, EASYLOTTO=0
+  // Configure SuperSeven (0)
     const ticketPriceUSD = ethers.utils.parseEther('1');
     const drawInterval = 24 * 60 * 60;
     await cryptoDraw.setGameConfig(0, ticketPriceUSD, drawInterval, true);
@@ -87,7 +87,7 @@ describe('CryptoDrawV2 (current API) - basic flows', function () {
   it('accrues and withdraws agent commission', async function () {
     const { cryptoDraw, agent, user } = await deployFixture();
 
-  // Configure EasyLotto (0)
+  // Configure EasyLotto (1)
     await cryptoDraw.setGameConfig(1, ethers.utils.parseEther('2'), 7 * 24 * 60 * 60, true);
 
     // Buy with agent
