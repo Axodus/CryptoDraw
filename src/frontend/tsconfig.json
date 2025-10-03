@@ -23,9 +23,13 @@
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["../models/*", "../utils/*", "../services/*", "../hooks/*", "../components/*"],
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@contracts/*": ["../../contracts/*"],
+      "@libs/*": ["../../libs/*"],
+      "@backend/*": ["../backend/*"],
+      "@config/*": ["../../config/*"]
     },
-    "types": ["react", "react-dom"]
+    "types": ["react", "react-dom", "vite/client", "node"]
   },
   "include": [
     "src",
