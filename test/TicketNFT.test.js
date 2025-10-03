@@ -1,5 +1,67 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+
+describe("TicketNFT - Coverage", function () {
+  let TicketNFT, ticketNFT, owner, addr1, addr2;
+
+  beforeEach(async function () {
+    [owner, addr1, addr2] = await ethers.getSigners();
+    TicketNFT = await ethers.getContractFactory("TicketNFT");
+    ticketNFT = await TicketNFT.deploy();
+    await ticketNFT.deployed();
+  });
+
+  it("should mint and provide tokenURI and enforce soulbound restrictions", async function () {
+    await ticketNFT.mint(addr1.address, 1, 100, 1); // rounds, price, gameType are example args in this repo
+    const balance = await ticketNFT.balanceOf(addr1.address);
+    expect(balance).to.equal(1);
+
+    const tokenId = (await ticketNFT.tokenOfOwnerByIndex(addr1.address, 0)).toString();
+    expect(await ticketNFT.tokenURI(tokenId)).to.be.a("string");
+
+    // soulbound: transfers should revert
+    await expect(
+      ticketNFT.connect(addr1).transferFrom(addr1.address, addr2.address, tokenId)
+    ).to.be.reverted;
+  });
+
+  it("should allow only configured cryptoDraw address to call restricted functions", async function () {
+    // deploy helper that will act as CryptoDraw
+    const TestTicketNFCCaller = await ethers.getContractFactory("TestTicketNFCCaller");
+    const helper = await TestTicketNFCCaller.deploy(ticketNFT.address);
+
+    // owner sets helper as cryptoDraw address
+    await ticketNFT.setCryptoDrawAddress(helper.address);
+
+    // mint a token directly via owner
+    await ticketNFT.mint(owner.address, 1, 100, 1);
+    const tokenId = (await ticketNFT.tokenOfOwnerByIndex(owner.address, 0)).toString();
+
+    // helper can call decrementRounds (onlyCryptoDraw)
+    await helper.callDecrement(tokenId);
+    await helper.callUpdate(tokenId, 2);
+    await helper.callBurn(tokenId);
+
+    expect(await ticketNFT.balanceOf(owner.address)).to.equal(0);
+  });
+
+  it("should expose status changes and round decrements properly", async function () {
+    await ticketNFT.mint(owner.address, 3, 100, 1);
+    const tokenId = (await ticketNFT.tokenOfOwnerByIndex(owner.address, 0)).toString();
+    expect(await ticketNFT.getTicketRounds(tokenId)).to.equal(3);
+
+    const TestTicketNFCCaller = await ethers.getContractFactory("TestTicketNFCCaller");
+    const helper = await TestTicketNFCCaller.deploy(ticketNFT.address);
+    await ticketNFT.setCryptoDrawAddress(helper.address);
+
+    await helper.callDecrement(tokenId);
+    expect(await ticketNFT.getTicketRounds(tokenId)).to.equal(2);
+    await helper.callUpdate(tokenId, 99);
+    expect(await ticketNFT.getTicketStatus(tokenId)).to.equal(99);
+  });
+});
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 require("./setup");
 
