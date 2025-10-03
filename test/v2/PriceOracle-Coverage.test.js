@@ -44,12 +44,12 @@ describe("PriceOracle - Coverage Tests", function () {
             ).to.be.revertedWith("Ownable: caller is not the owner");
         });
 
-        it("should allow operator to call operator functions", async function () {
+        it("should allow owner to call owner functions", async function () {
             // First add the token
             await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
             
             await expect(
-                priceOracle.connect(operator).updatePrice(mockToken.address, ethers.utils.parseEther("2"))
+                priceOracle.connect(owner).updatePrice(mockToken.address, ethers.utils.parseEther("2"))
             ).to.not.be.reverted;
         });
     });

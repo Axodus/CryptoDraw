@@ -7,6 +7,12 @@ try {
 } catch (e) {
   console.log('Warning: @nomiclabs/hardhat-waffle not installed');
 }
+// Register chai matchers for custom errors
+try {
+  require('@nomicfoundation/hardhat-chai-matchers');
+} catch (e) {
+  console.log('Warning: @nomicfoundation/hardhat-chai-matchers not installed');
+}
 // Register coverage plugin
 try {
   require('solidity-coverage');
