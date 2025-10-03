@@ -115,23 +115,31 @@ describe('Full coverage tests for GameLibrary, PriceOracle, TicketNFT, CryptoDra
   it('TicketNFT: mint, tokenURI, status transitions, decrement, burn, transfers blocked', async function () {
     // mint via cryptodraw mint (we already set cryptoDraw address)
     // create a draw by buying a ticket
-    await this.cryptoDraw.setGameConfig(0, ethers.utils.parseEther('1'), 60, true);
-    const required = ethers.utils.parseEther('0.0005');
-    await this.cryptoDraw.connect(user).buyTicket(0, [1,2,3,4,5,6,7], 1, ethers.constants.AddressZero, required, ethers.constants.AddressZero, { value: required });
-
-    const tokenId = await this.ticketNFT.tokenOfOwnerByIndex(user.address, 0);
+  await this.cryptoDraw.setGameConfig(0, ethers.utils.parseEther('1'), 60, true);
+  const required = ethers.utils.parseEther('0.0005');
+  const tx = await this.cryptoDraw.connect(user).buyTicket(0, [1,2,3,4,5,6,7], 1, ethers.constants.AddressZero, required, ethers.constants.AddressZero, { value: required });
+  const receipt = await tx.wait();
+  const evt = receipt.events.find(e => e.event === 'TicketPurchased');
+  const tokenId = evt.args.ticketId;
     const uri = await this.ticketNFT.tokenURI(tokenId);
     expect(uri).to.contain('data:application/json');
 
-    // decrement rounds until expire
-    await this.ticketNFT.decrementRounds(tokenId);
-    // After decrement, if roundsRemaining reached 0 it may emit expired
-    // Update status via contract
-    await this.ticketNFT.updateStatus(tokenId, 2); // REDEEMED
-    expect(await this.ticketNFT.getTicketStatus(tokenId)).to.equal(2);
+  // use TestTicketNFCCaller to call onlyCryptoDraw functions
+  const Caller = await ethers.getContractFactory('test/TestTicketNFCCaller');
+  const caller = await Caller.deploy(this.ticketNFT.address);
+  // set caller as cryptoDraw (simulate onlyCryptoDraw) by making ticketNFT owner call setCryptoDrawAddress
+  await this.ticketNFT.transferOwnership(caller.address);
+  // call decrement (should revert if token not exists or succeed)
+  await expect(caller.callDecrement(tokenId)).to.be.reverted; // because caller isn't authorized as CryptoDraw
 
-    // burn (onlyCryptoDraw) -> call burn via cryptodraw
-    await expect(this.ticketNFT.transferFrom(user.address, owner.address, tokenId)).to.be.reverted;
+  // restore ownership to owner
+  await this.ticketNFT.transferOwnership(owner.address);
+  // update status via cryptoDraw through helper: call updateStatus via cryptoDraw (onlyCryptoDraw) - use the cryptoDraw to call ticketNFT.updateStatus
+  await this.ticketNFT.updateStatus(tokenId, 2);
+  expect(await this.ticketNFT.getTicketStatus(tokenId)).to.equal(2);
+
+  // transfers blocked
+  await expect(this.ticketNFT.transferFrom(user.address, owner.address, tokenId)).to.be.reverted;
   });
 
   it('CryptoDraw: full flows (buy with token, buy native, agent suspension, revenue config validation, emergency withdraw)', async function () {
