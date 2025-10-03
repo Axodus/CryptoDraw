@@ -31,7 +31,7 @@ describe("TicketNFT Basic Tests", function () {
     });
 
     it("Should start with zero current token ID", async function () {
-      // TicketNFT não tem totalSupply, mas podemos verificar que começa com ID 0
+  // TicketNFT has no totalSupply, but we can verify it starts from tokenId 0
       expect(await ticketNFT.owner()).to.equal(owner.address);
     });
   });
@@ -39,7 +39,7 @@ describe("TicketNFT Basic Tests", function () {
   describe("Minting", function () {
     it("Should mint NFT to user", async function () {
       const gameType = 1; // EASYLOTTO
-      const numbersPacked = 12345; // Números empacotados em uint32
+  const numbersPacked = 12345; // Numbers packed into uint32
       const drawRound = 1;
       const rounds = 1;
 
@@ -56,14 +56,14 @@ describe("TicketNFT Basic Tests", function () {
 
       await expect(
         ticketNFT.connect(user1).mint(user2.address, gameType, numbersPacked, drawRound, rounds)
-      ).to.be.reverted; // onlyCryptoDraw()
+  ).to.be.reverted; // onlyCryptoDraw()
     });
   });
 
   describe("Token Data", function () {
     beforeEach(async function () {
       const gameType = 1; // EASYLOTTO
-      const numbersPacked = 12345; // Números empacotados
+  const numbersPacked = 12345; // Packed numbers
       const drawRound = 1;
       const rounds = 1;
 

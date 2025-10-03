@@ -25,7 +25,7 @@ describe("TicketNFT Contract (aligned with current API)", function () {
     it("owner can set CryptoDraw address", async function () {
       const { ticketNFT, owner, cryptoDraw } = await loadFixture(deployTicketNFTFixture);
       await ticketNFT.connect(owner).setCryptoDrawAddress(cryptoDraw.address);
-      // Não há evento; validamos chamando uma função restrita
+  // No event is emitted; validate by calling a restricted function
       await expect(
         ticketNFT.connect(cryptoDraw).mint(cryptoDraw.address, 1, 12345, 1, 1)
       ).to.not.be.reverted;
