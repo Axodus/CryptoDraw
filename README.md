@@ -1,5 +1,7 @@
 # **CryptoDraw: Revolutionizing Lottery with Blockchain Technology** 
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/cb5a0c53ec754a328195c831f536a27b)](https://app.codacy.com/gh/Axodus/CryptoDraw/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 ### **1. Introduction**
 
 #### **What is CryptoDraw?**
