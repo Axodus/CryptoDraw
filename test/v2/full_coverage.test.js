@@ -125,21 +125,26 @@ describe('Full coverage tests for GameLibrary, PriceOracle, TicketNFT, CryptoDra
     expect(uri).to.contain('data:application/json');
 
   // use TestTicketNFCCaller to call onlyCryptoDraw functions
-  const Caller = await ethers.getContractFactory('test/TestTicketNFCCaller');
+  const Caller = await ethers.getContractFactory('TestTicketNFCCaller');
   const caller = await Caller.deploy(this.ticketNFT.address);
-  // set caller as cryptoDraw (simulate onlyCryptoDraw) by making ticketNFT owner call setCryptoDrawAddress
-  await this.ticketNFT.transferOwnership(caller.address);
-  // call decrement (should revert if token not exists or succeed)
-  await expect(caller.callDecrement(tokenId)).to.be.reverted; // because caller isn't authorized as CryptoDraw
+  // set caller as cryptoDraw (simulate onlyCryptoDraw) by owner calling setCryptoDrawAddress
+  await this.ticketNFT.connect(owner).setCryptoDrawAddress(caller.address);
 
-  // restore ownership to owner
-  await this.ticketNFT.transferOwnership(owner.address);
-  // update status via cryptoDraw through helper: call updateStatus via cryptoDraw (onlyCryptoDraw) - use the cryptoDraw to call ticketNFT.updateStatus
-  await this.ticketNFT.updateStatus(tokenId, 2);
+  // call decrement via caller (should succeed or update rounds)
+  await caller.callDecrement(tokenId);
+
+  // call update status via caller
+  await caller.callUpdate(tokenId, 2);
   expect(await this.ticketNFT.getTicketStatus(tokenId)).to.equal(2);
+
+  // call burn via caller
+  await caller.callBurn(tokenId);
 
   // transfers blocked
   await expect(this.ticketNFT.transferFrom(user.address, owner.address, tokenId)).to.be.reverted;
+
+  // restore cryptoDraw address
+  await this.ticketNFT.connect(owner).setCryptoDrawAddress(this.cryptoDraw.address);
   });
 
   it('CryptoDraw: full flows (buy with token, buy native, agent suspension, revenue config validation, emergency withdraw)', async function () {
@@ -153,7 +158,9 @@ describe('Full coverage tests for GameLibrary, PriceOracle, TicketNFT, CryptoDra
 
     // purchase with token (approve)
     const usdPrice = ethers.utils.parseEther('1');
-    const payAmount = await this.priceOracle.convertFromUSD(token.address, usdPrice);
+  // ensure priceOracle knows the token
+  await this.priceOracle.addToken(token.address, 18, ethers.utils.parseUnits('1', 18));
+  const payAmount = await this.priceOracle.convertFromUSD(token.address, usdPrice);
     await token.connect(user).approve(this.cryptoDraw.address, payAmount);
 
     await this.cryptoDraw.connect(user).buyTicketWithToken(0, [1,2,3,4,5,6,7], 1, token.address, payAmount, ethers.constants.AddressZero);
