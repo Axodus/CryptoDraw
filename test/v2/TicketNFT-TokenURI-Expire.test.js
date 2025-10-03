@@ -28,15 +28,19 @@ describe("TicketNFT - tokenURI and expire behavior", function () {
     const json = buff.toString('utf8');
     expect(json).to.include('#');
 
-        // Expire
-        await ticketNFT.connect(minter).updateStatus(tokenId, 1);
-        const uriExpired = await ticketNFT.tokenURI(tokenId);
-        expect(uriExpired).to.include('Expired');
+    // Expire
+    await ticketNFT.connect(minter).updateStatus(tokenId, 1);
+    const uriExpired = await ticketNFT.tokenURI(tokenId);
+    const base64Expired = uriExpired.split(',')[1];
+    const jsonExpired = Buffer.from(base64Expired, 'base64').toString('utf8');
+    expect(jsonExpired).to.include('Expired');
 
-        // Redeem
-        await ticketNFT.connect(minter).updateStatus(tokenId, 2);
-        const uriRedeemed = await ticketNFT.tokenURI(tokenId);
-        expect(uriRedeemed).to.include('Redeemed');
+    // Redeem
+    await ticketNFT.connect(minter).updateStatus(tokenId, 2);
+    const uriRedeemed = await ticketNFT.tokenURI(tokenId);
+    const base64Redeemed = uriRedeemed.split(',')[1];
+    const jsonRedeemed = Buffer.from(base64Redeemed, 'base64').toString('utf8');
+    expect(jsonRedeemed).to.include('Redeemed');
 
         // Burn (mint a new token to test burned state via burn)
         const tx2 = await ticketNFT.connect(minter).mint(user1.address, 0, 54321, 1, 1);
