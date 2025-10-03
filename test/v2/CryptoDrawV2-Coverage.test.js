@@ -24,12 +24,11 @@ describe("CryptoDrawV2 - Coverage Tests", function () {
         const PriceOracle = await ethers.getContractFactory("PriceOracle");
         priceOracle = await PriceOracle.deploy(owner.address);
         
-        // Add native token
-        await priceOracle.addToken(ethers.constants.AddressZero, 18, 1000000000000000000n);
+        // Native token is already configured in PriceOracle constructor
 
         // Deploy TicketNFT
         const TicketNFT = await ethers.getContractFactory("TicketNFT");
-        ticketNFT = await TicketNFT.deploy(owner.address, "CryptoDraw Ticket", "CDT");
+        ticketNFT = await TicketNFT.deploy();
 
         // Deploy CryptoDraw
         const CryptoDraw = await ethers.getContractFactory("CryptoDrawV2", {
@@ -48,11 +47,11 @@ describe("CryptoDrawV2 - Coverage Tests", function () {
         );
 
         // Setup permissions
-        await ticketNFT.grantRole(await ticketNFT.MINTER_ROLE(), cryptoDraw.address);
+        await ticketNFT.setCryptoDrawAddress(cryptoDraw.address);
         await cryptoDraw.grantRole(await cryptoDraw.AGENT_ROLE(), agent.address);
 
         // Deploy mock ERC20
-        const MockToken = await ethers.getContractFactory("MockERC20");
+        const MockToken = await ethers.getContractFactory("MockToken");
         mockToken = await MockToken.deploy("Mock Token", "MOCK", 18);
         await mockToken.mint(user1.address, ethers.utils.parseEther("1000"));
 

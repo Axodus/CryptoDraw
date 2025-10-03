@@ -19,7 +19,7 @@ describe("PriceOracle - Coverage Tests", function () {
         priceOracle = await PriceOracle.deploy(owner.address);
 
         // Deploy mock token
-        const MockToken = await ethers.getContractFactory("MockERC20");
+        const MockToken = await ethers.getContractFactory("MockToken");
         mockToken = await MockToken.deploy("Mock Token", "MOCK", 18);
 
         // Grant operator role

@@ -10,8 +10,8 @@ describe("GameLibrary - Coverage Tests", function () {
     let gameLibrary;
 
     beforeEach(async function () {
-        const GameLibrary = await ethers.getContractFactory("GameLibrary");
-        gameLibrary = await GameLibrary.deploy();
+        const GameLibraryWrapper = await ethers.getContractFactory("GameLibraryWrapper");
+        gameLibrary = await GameLibraryWrapper.deploy();
     });
 
     describe("SuperSeven Number Validation", function () {

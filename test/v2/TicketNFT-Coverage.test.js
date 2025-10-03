@@ -15,54 +15,40 @@ describe("TicketNFT - Coverage Tests", function () {
 
         // Deploy TicketNFT
         const TicketNFT = await ethers.getContractFactory("TicketNFT");
-        ticketNFT = await TicketNFT.deploy(owner.address, "CryptoDraw Ticket", "CDT");
+        ticketNFT = await TicketNFT.deploy();
 
-        // Grant roles
-        const MINTER_ROLE = await ticketNFT.MINTER_ROLE();
-        const OPERATOR_ROLE = await ticketNFT.OPERATOR_ROLE();
-        await ticketNFT.grantRole(MINTER_ROLE, minter.address);
-        await ticketNFT.grantRole(OPERATOR_ROLE, operator.address);
+        // Setup permissions - TicketNFT uses onlyCryptoDraw and onlyOwner
+        await ticketNFT.setCryptoDrawAddress(minter.address); // minter acts as CryptoDraw contract
     });
 
-    describe("Access Control - onlyRole modifiers", function () {
-        it("should revert when non-minter calls mint", async function () {
-            const MINTER_ROLE = await ticketNFT.MINTER_ROLE();
-
+    describe("Access Control - onlyCryptoDraw modifier", function () {
+        it("should revert when non-CryptoDraw calls mint", async function () {
             await expect(
                 ticketNFT.connect(user1).mint(user1.address, 0, 12345, 1, 1)
-            ).to.be.revertedWith(`AccessControl: account ${user1.address.toLowerCase()} is missing role ${MINTER_ROLE}`);
+            ).to.be.revertedWithCustomError(ticketNFT, "OnlyCryptoDrawContract");
         });
 
-        it("should revert when non-operator calls operator functions", async function () {
-            const OPERATOR_ROLE = await ticketNFT.OPERATOR_ROLE();
-
-            // First mint a token
-            await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1);
-
+        it("should revert when non-owner calls owner functions", async function () {
             await expect(
-                ticketNFT.connect(user1).updateStatus(1, 1)
-            ).to.be.revertedWith(`AccessControl: account ${user1.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`);
-
-            await expect(
-                ticketNFT.connect(user1).burn(1)
-            ).to.be.revertedWith(`AccessControl: account ${user1.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`);
+                ticketNFT.connect(user1).setCryptoDrawAddress(user1.address)
+            ).to.be.revertedWith("Ownable: caller is not the owner");
         });
 
-        it("should allow minter to mint", async function () {
+        it("should allow CryptoDraw to mint", async function () {
             await expect(
                 ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1)
             ).to.not.be.reverted;
         });
 
-        it("should allow operator to update status and burn", async function () {
+        it("should allow CryptoDraw to update status and burn", async function () {
             await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1);
 
             await expect(
-                ticketNFT.connect(operator).updateStatus(1, 1)
+                ticketNFT.connect(minter).updateStatus(1, 1)
             ).to.not.be.reverted;
 
             await expect(
-                ticketNFT.connect(operator).burn(1)
+                ticketNFT.connect(minter).burn(1)
             ).to.not.be.reverted;
         });
     });
