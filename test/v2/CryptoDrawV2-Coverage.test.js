@@ -16,10 +16,6 @@ describe("CryptoDrawV2 - Coverage Tests", function () {
     beforeEach(async function () {
         [owner, user1, user2, agent, treasury, prize, project, grant, operation] = await ethers.getSigners();
 
-        // Deploy GameLibrary
-        const GameLibrary = await ethers.getContractFactory("GameLibrary");
-        gameLibrary = await GameLibrary.deploy();
-
         // Deploy PriceOracle
         const PriceOracle = await ethers.getContractFactory("PriceOracle");
         priceOracle = await PriceOracle.deploy(owner.address);
@@ -30,12 +26,8 @@ describe("CryptoDrawV2 - Coverage Tests", function () {
         const TicketNFT = await ethers.getContractFactory("TicketNFT");
         ticketNFT = await TicketNFT.deploy();
 
-        // Deploy CryptoDraw
-        const CryptoDraw = await ethers.getContractFactory("CryptoDraw", {
-            libraries: {
-                GameLibrary: gameLibrary.address,
-            },
-        });
+        // Deploy CryptoDraw (GameLibrary functions are internal and inlined)
+        const CryptoDraw = await ethers.getContractFactory("CryptoDraw");
         cryptoDraw = await CryptoDraw.deploy(
             ticketNFT.address,
             priceOracle.address,
