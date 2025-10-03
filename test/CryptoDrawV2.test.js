@@ -1,5 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { loadFixture, time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("CryptoDrawV2 - Coverage & Priority", function () {
   let CryptoDraw, cryptoDraw, owner, addr1, addr2;
@@ -55,10 +56,8 @@ describe("CryptoDrawV2 - Coverage & Priority", function () {
     await cryptoDraw.updateRevenueConfig(500, 100); // assume owner can call
     // No revert means success
   });
+
 });
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
-const { loadFixture, time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("CryptoDrawV2 Contract", function () {
   // Deployment fixture
