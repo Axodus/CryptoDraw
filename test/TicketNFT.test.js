@@ -1,5 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("TicketNFT - Coverage", function () {
   let TicketNFT, ticketNFT, owner, addr1, addr2;
@@ -60,10 +61,6 @@ describe("TicketNFT - Coverage", function () {
     expect(await ticketNFT.getTicketStatus(tokenId)).to.equal(99);
   });
 });
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
-const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
-require("./setup");
 
 describe("TicketNFT Contract (aligned with current API)", function () {
   async function deployTicketNFTFixture() {
