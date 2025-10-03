@@ -5,7 +5,8 @@ import cors from 'cors';
 import { router as apiRouter } from './routes';
 
 const app = express();
-app.use(cors());
+const corsOrigin = process.env.FRONTEND_ORIGIN || '*';
+app.use(cors({ origin: corsOrigin }));
 app.use(express.json());
 
 app.use('/api', apiRouter);

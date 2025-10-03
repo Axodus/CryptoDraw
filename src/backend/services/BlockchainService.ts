@@ -1,8 +1,8 @@
-export type Ticket = any;
+import { Ticket, GameType } from '../types/Ticket';
 
 export class BlockchainService {
-  async getTicket(ticketId: string): Promise<Ticket | null> {
-    // TODO: Integrate with on-chain or indexer
+  // Placeholder: replace with on-chain/indexer integration
+  async getTicket(_ticketId: string): Promise<Ticket | null> {
     return null;
   }
 

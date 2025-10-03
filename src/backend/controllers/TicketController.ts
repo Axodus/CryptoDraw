@@ -1,12 +1,12 @@
 /**
- * Controlador para gerenciamento de tickets
+ * Ticket management controller
  * Backend API - CryptoDraw
  */
 
 import type { Request, Response } from 'express';
 
-import { Ticket, GameType } from '../../models/Ticket';
-import { BlockchainService } from '../../services/BlockchainService';
+import { Ticket, GameType } from '../types/Ticket';
+import { BlockchainService } from '../services/BlockchainService';
 
 export class TicketController {
   private blockchainService: BlockchainService;
@@ -17,7 +17,7 @@ export class TicketController {
 
   /**
    * GET /api/tickets/:ticketId
-   * Busca informações de um ticket específico
+   * Fetch a single ticket by id
    */
   async getTicket(req: Request, res: Response): Promise<void> {
     try {
@@ -54,12 +54,12 @@ export class TicketController {
 
   /**
    * GET /api/tickets/user/:address
-   * Busca todos os tickets de um usuário
+   * Fetch all tickets for a given user
    */
   async getUserTickets(req: Request, res: Response): Promise<void> {
     try {
       const { address } = req.params;
-      const { game, status, limit = 50, offset = 0 } = req.query;
+      const { game, status, limit = "50", offset = "0" } = req.query as Record<string, string>;
 
       if (!this.isValidAddress(address)) {
         res.status(400).json({ error: 'Invalid address', code: 'INVALID_ADDRESS' });
@@ -70,7 +70,7 @@ export class TicketController {
 
       // Filtrar por jogo se especificado
       if (game !== undefined) {
-        const gameType = parseInt(game);
+        const gameType = Number(game);
         if (gameType === GameType.EASYLOTTO || gameType === GameType.SUPERSEVEN) {
           tickets = tickets.filter(ticket => ticket.game === gameType);
         }
@@ -82,15 +82,17 @@ export class TicketController {
       }
 
       // Paginação
-      const paginatedTickets = tickets.slice(offset, offset + limit);
+  const off = Number(offset) || 0;
+  const lim = Math.min(Math.max(Number(limit) || 50, 1), 200);
+  const paginatedTickets = tickets.slice(off, off + lim);
 
       res.json({
         success: true,
         data: {
           tickets: paginatedTickets,
           total: tickets.length,
-          limit: parseInt(limit),
-          offset: parseInt(offset),
+          limit: lim,
+          offset: off,
         }
       });
 
@@ -105,19 +107,19 @@ export class TicketController {
 
   /**
    * GET /api/tickets/:ticketId/proof
-   * Busca proof de vitória para um ticket
+   * Get winning proof for a ticket
    */
   async getWinningProof(req: Request, res: Response): Promise<void> {
     try {
       const { ticketId } = req.params;
-      const { drawId } = req.query;
+      const { drawId } = req.query as Record<string, string>;
 
       if (!this.isValidTicketId(ticketId)) {
         res.status(400).json({ error: 'Invalid ticket id', code: 'INVALID_TICKET_ID' });
         return;
       }
 
-      if (!drawId || !this.isValidDrawId(parseInt(drawId))) {
+      if (!drawId || !this.isValidDrawId(Number(drawId))) {
         res.status(400).json({ error: 'Invalid draw id', code: 'INVALID_DRAW_ID' });
         return;
       }
@@ -130,25 +132,22 @@ export class TicketController {
       }
 
       // Verificar vitória
-      const winningResult = await this.blockchainService.checkWinning(
-        ticketId,
-        parseInt(drawId)
-      );
+      const winningResult = await this.blockchainService.checkWinning(ticketId, Number(drawId));
 
       if (!winningResult.isWinner) {
         res.status(404).json({ error: 'Ticket is not a winner in this draw', code: 'NOT_A_WINNER' });
         return;
       }
 
-      // TODO: Buscar Merkle proof do banco de dados
-      // Por enquanto retorna placeholder
+      // TODO: Fetch Merkle proof from database/indexer
+      // Temporary placeholder
       const proof = {
         ticketId,
-        drawId: parseInt(drawId),
+        drawId: Number(drawId),
         tier: winningResult.tier,
         prizeAmount: winningResult.prizeAmount,
-        merkleProof: [], // TODO: implementar busca real
-        leafIndex: 0     // TODO: implementar busca real
+        merkleProof: [], // TODO: implement real lookup
+        leafIndex: 0     // TODO: implement real lookup
       };
 
       res.json({
@@ -167,7 +166,7 @@ export class TicketController {
 
   /**
    * POST /api/tickets/validate
-   * Valida números de um ticket antes da compra
+   * Validate ticket numbers before purchase
    */
   async validateTicketNumbers(req: Request, res: Response): Promise<void> {
     try {
@@ -207,7 +206,7 @@ export class TicketController {
   }
 
   /**
-   * Validações privadas
+   * Private validations/helpers
    */
   private isValidTicketId(ticketId: string): boolean {
     return /^\d+$/.test(ticketId) && parseInt(ticketId) > 0;
@@ -234,11 +233,11 @@ export class TicketController {
       }
       
       if (numbers.some(n => n < 1 || n > 25)) {
-        errors.push('Números devem estar entre 1 e 25');
+        errors.push('Numbers must be between 1 and 25');
       }
       
       if (new Set(numbers).size !== numbers.length) {
-        errors.push('Números devem ser únicos');
+        errors.push('Numbers must be unique');
       }
     } else if (game === GameType.SUPERSEVEN) {
       if (numbers.length !== 7) {
