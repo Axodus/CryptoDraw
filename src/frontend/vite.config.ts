@@ -1,6 +1,13 @@
+/// <reference types="node" />
+/// <reference types="vite/client" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+// Compute __dirname in ESM context
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 // https://vitejs.dev/config/
 export default defineConfig({

@@ -4,6 +4,19 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+/// @notice Band Protocol StdReference interface (Harmony)
+interface IStdReference {
+    struct ReferenceData {
+        uint256 rate; // price with 1e18 scaling
+        uint256 lastUpdatedBase;
+        uint256 lastUpdatedQuote;
+    }
+    function getReferenceData(string calldata _base, string calldata _quote)
+        external
+        view
+        returns (ReferenceData memory);
+}
+
 /**
  * @title PriceOracle
  * @dev Oracle de preços para conversão USD no sistema CryptoDraw
@@ -35,6 +48,15 @@ contract PriceOracle is Ownable, ReentrancyGuard {
      * @param supported Se o token está suportado
      */
     event TokenSupportUpdated(address indexed token, bool supported);
+
+    /// @dev Emitido quando a fonte de preço de um token é configurada
+    event FeedConfigured(
+        address indexed token,
+        uint8 source,
+        address adapter,
+        string base,
+        string quote
+    );
     
     // ============ STRUCTS ============
     
@@ -51,11 +73,25 @@ contract PriceOracle is Ownable, ReentrancyGuard {
         uint8 decimals;         // Decimais do token
         bool supported;         // Token suportado
     }
+
+    /// @dev Fontes de preço suportadas
+    enum PriceSource { MANUAL, BAND }
+
+    /// @dev Configuração de feed externo (Band)
+    struct FeedConfig {
+        PriceSource source;     // Fonte de preço
+        address adapter;        // Endereço do StdReference (Band)
+        string base;            // Símbolo base (ex.: "ONE")
+        string quote;           // Símbolo quote (ex.: "USD")
+    }
     
     // ============ STATE VARIABLES ============
     
     /// @dev Mapping de token para dados de preço
     mapping(address => PriceData) public priceData;
+
+    /// @dev Mapeia token -> configuração de feed externo
+    mapping(address => FeedConfig) public feedConfig;
     
     /// @dev Lista de tokens suportados
     address[] public supportedTokens;
@@ -84,9 +120,18 @@ contract PriceOracle is Ownable, ReentrancyGuard {
      * @param token Endereço do token a verificar
      */
     modifier notStale(address token) {
-        PriceData memory data = priceData[token];
-        if (block.timestamp - data.lastUpdate > maxPriceAge) {
-            revert StalePrice(data.lastUpdate, maxPriceAge);
+        FeedConfig storage cfg = feedConfig[token];
+        if (cfg.source == PriceSource.BAND) {
+            IStdReference.ReferenceData memory rd = IStdReference(cfg.adapter).getReferenceData(cfg.base, cfg.quote);
+            uint256 refTime = rd.lastUpdatedBase < rd.lastUpdatedQuote ? rd.lastUpdatedBase : rd.lastUpdatedQuote;
+            if (block.timestamp - refTime > maxPriceAge) {
+                revert StalePrice(refTime, maxPriceAge);
+            }
+        } else {
+            PriceData memory data = priceData[token];
+            if (block.timestamp - data.lastUpdate > maxPriceAge) {
+                revert StalePrice(data.lastUpdate, maxPriceAge);
+            }
         }
         _;
     }
@@ -127,6 +172,11 @@ contract PriceOracle is Ownable, ReentrancyGuard {
         notStale(token)
         returns (uint256 price) 
     {
+        FeedConfig storage cfg = feedConfig[token];
+        if (cfg.source == PriceSource.BAND) {
+            IStdReference.ReferenceData memory rd = IStdReference(cfg.adapter).getReferenceData(cfg.base, cfg.quote);
+            return rd.rate; // already 1e18
+        }
         return priceData[token].price;
     }
     
@@ -146,18 +196,24 @@ contract PriceOracle is Ownable, ReentrancyGuard {
         if (amount == 0) revert ZeroAmount();
         
         PriceData memory data = priceData[token];
+        uint256 price = priceData[token].price;
+        FeedConfig storage cfg = feedConfig[token];
+        if (cfg.source == PriceSource.BAND) {
+            IStdReference.ReferenceData memory rd = IStdReference(cfg.adapter).getReferenceData(cfg.base, cfg.quote);
+            price = rd.rate; // 1e18
+        }
         
         // Converter para 18 decimais se necessário
         if (data.decimals == 18) {
-            usdValue = (amount * data.price) / 1e18;
+            usdValue = (amount * price) / 1e18;
         } else if (data.decimals < 18) {
             // Token tem menos decimais, escalar para cima
             uint256 scaleFactor = 10**(18 - data.decimals);
-            usdValue = (amount * scaleFactor * data.price) / 1e18;
+            usdValue = (amount * scaleFactor * price) / 1e18;
         } else {
             // Token tem mais decimais, escalar para baixo
             uint256 scaleFactor = 10**(data.decimals - 18);
-            usdValue = (amount * data.price) / (scaleFactor * 1e18);
+            usdValue = (amount * price) / (scaleFactor * 1e18);
         }
         
         return usdValue;
@@ -177,22 +233,28 @@ contract PriceOracle is Ownable, ReentrancyGuard {
         returns (uint256 tokenAmount)
     {
         if (usdAmount == 0) revert ZeroAmount();
-        
+
         PriceData memory data = priceData[token];
-        
+        uint256 price = data.price;
+        FeedConfig storage cfg = feedConfig[token];
+        if (cfg.source == PriceSource.BAND) {
+            IStdReference.ReferenceData memory rd = IStdReference(cfg.adapter).getReferenceData(cfg.base, cfg.quote);
+            price = rd.rate; // 1e18
+        }
+
         // Converter de USD para token
         if (data.decimals == 18) {
-            tokenAmount = (usdAmount * 1e18) / data.price;
+            tokenAmount = (usdAmount * 1e18) / price;
         } else if (data.decimals < 18) {
             // Token tem menos decimais
             uint256 scaleFactor = 10**(18 - data.decimals);
-            tokenAmount = (usdAmount * 1e18) / (data.price * scaleFactor);
+            tokenAmount = (usdAmount * 1e18) / (price * scaleFactor);
         } else {
             // Token tem mais decimais
             uint256 scaleFactor = 10**(data.decimals - 18);
-            tokenAmount = (usdAmount * scaleFactor * 1e18) / data.price;
+            tokenAmount = (usdAmount * scaleFactor * 1e18) / price;
         }
-        
+
         return tokenAmount;
     }
     
@@ -248,7 +310,7 @@ contract PriceOracle is Ownable, ReentrancyGuard {
         external 
         onlyOwner 
     {
-        if (token == address(0) && token != NATIVE_ONE) revert ZeroAddress();
+        require(token != NATIVE_ONE, "Use native ONE");
         require(!priceData[token].supported, "Token already supported");
         if (initialPrice == 0) revert InvalidPrice(initialPrice);
         
@@ -263,6 +325,38 @@ contract PriceOracle is Ownable, ReentrancyGuard {
         
         emit TokenSupportUpdated(token, true);
         emit PriceUpdated(token, initialPrice, block.timestamp);
+    }
+
+    /**
+     * @dev Configura Band StdReference como fonte de preço para um token
+     * @param token Endereço do token (0x0 para nativo ONE)
+     * @param stdRef Endereço do contrato StdReference do Band
+     * @param base Símbolo base (ex.: "ONE")
+     * @param quote Símbolo quote (ex.: "USD")
+     */
+    function setBandFeed(
+        address token,
+        address stdRef,
+        string calldata base,
+        string calldata quote
+    ) external onlyOwner onlySupportedToken(token) {
+        if (stdRef == address(0)) revert ZeroAddress();
+        require(bytes(base).length > 0 && bytes(quote).length > 0, "Invalid pair");
+        feedConfig[token] = FeedConfig({
+            source: PriceSource.BAND,
+            adapter: stdRef,
+            base: base,
+            quote: quote
+        });
+        emit FeedConfigured(token, uint8(PriceSource.BAND), stdRef, base, quote);
+    }
+
+    /**
+     * @dev Remove feed externo e volta para fonte MANUAL
+     */
+    function clearFeed(address token) external onlyOwner onlySupportedToken(token) {
+        delete feedConfig[token];
+        emit FeedConfigured(token, uint8(PriceSource.MANUAL), address(0), "", "");
     }
     
     /**
@@ -315,6 +409,12 @@ contract PriceOracle is Ownable, ReentrancyGuard {
      */
     function isPriceValid(address token) external view returns (bool isValid) {
         if (!priceData[token].supported) return false;
+        FeedConfig storage cfg = feedConfig[token];
+        if (cfg.source == PriceSource.BAND) {
+            IStdReference.ReferenceData memory rd = IStdReference(cfg.adapter).getReferenceData(cfg.base, cfg.quote);
+            uint256 refTime = rd.lastUpdatedBase < rd.lastUpdatedQuote ? rd.lastUpdatedBase : rd.lastUpdatedQuote;
+            return (block.timestamp - refTime) <= maxPriceAge;
+        }
         return (block.timestamp - priceData[token].lastUpdate) <= maxPriceAge;
     }
     
