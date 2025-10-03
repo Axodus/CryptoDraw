@@ -286,6 +286,11 @@ describe("PriceOracle - Coverage Tests", function () {
     });
 
     describe("Band Oracle Integration", function () {
+        beforeEach(async function () {
+            // Ensure token is added before configuring feeds
+            await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
+        });
+
         it("should set Band feed configuration", async function () {
             // Mock Band oracle address
             const mockBandOracle = mockToken.address; // Reuse for simplicity
@@ -313,10 +318,15 @@ describe("PriceOracle - Coverage Tests", function () {
             expect(feedConfig.adapter).to.equal(ethers.constants.AddressZero);
         });
 
-        it("should prevent setting Band feed for native token", async function () {
+        it("should allow setting Band feed for native token", async function () {
+            // Contract allows configuring a feed for native token (constructor pre-configures native price)
             await expect(
                 priceOracle.setBandFeed(ethers.constants.AddressZero, mockToken.address, "ONE", "USD")
-            ).to.be.revertedWith("Use native config for native token");
+            ).to.not.be.reverted;
+
+            const nativeFeed = await priceOracle.feedConfig(ethers.constants.AddressZero);
+            expect(nativeFeed.source).to.equal(1);
+            expect(nativeFeed.adapter).to.equal(mockToken.address);
         });
     });
 

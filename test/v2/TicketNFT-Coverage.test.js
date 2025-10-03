@@ -41,14 +41,16 @@ describe("TicketNFT - Coverage Tests", function () {
         });
 
         it("should allow CryptoDraw to update status and burn", async function () {
-            await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1);
+            const tx = await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1);
+            const receipt = await tx.wait();
+            const tokenId = receipt.events.find(e => e.event === 'TicketMinted').args.tokenId;
 
             await expect(
-                ticketNFT.connect(minter).updateStatus(1, 1)
+                ticketNFT.connect(minter).updateStatus(tokenId, 1)
             ).to.not.be.reverted;
 
             await expect(
-                ticketNFT.connect(minter).burn(1)
+                ticketNFT.connect(minter).burn(tokenId)
             ).to.not.be.reverted;
         });
     });
