@@ -16,9 +16,9 @@ describe("CryptoDrawV2 - Coverage Tests", function () {
     beforeEach(async function () {
         [owner, user1, user2, agent, treasury, prize, project, grant, operation] = await ethers.getSigners();
 
-        // Deploy PriceOracle
-        const PriceOracle = await ethers.getContractFactory("PriceOracle");
-        priceOracle = await PriceOracle.deploy(owner.address);
+    // Deploy PriceOracle (initial native ONE price = $1)
+    const PriceOracle = await ethers.getContractFactory("PriceOracle");
+    priceOracle = await PriceOracle.deploy(ethers.utils.parseEther("1"));
         
         // Native token is already configured in PriceOracle constructor
 
