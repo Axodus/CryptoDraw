@@ -38,3 +38,7 @@ node_modules/
 # Build artifacts
 artifacts/
 cache/
+
+# Logs
+logs/
+coverage/

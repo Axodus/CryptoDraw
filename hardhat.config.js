@@ -5,6 +5,12 @@ try {
 } catch (e) {
   console.log('Warning: @nomiclabs/hardhat-waffle not installed');
 }
+// Register coverage plugin
+try {
+  require('solidity-coverage');
+} catch (e) {
+  console.log('Warning: solidity-coverage not available');
+}
 require('dotenv').config();
 
 // Try to require network helpers with fallback
