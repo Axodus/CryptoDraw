@@ -31,7 +31,7 @@ describe("CryptoDrawV2 - Coverage Tests", function () {
         ticketNFT = await TicketNFT.deploy();
 
         // Deploy CryptoDraw
-        const CryptoDraw = await ethers.getContractFactory("CryptoDrawV2", {
+        const CryptoDraw = await ethers.getContractFactory("CryptoDraw", {
             libraries: {
                 GameLibrary: gameLibrary.address,
             },

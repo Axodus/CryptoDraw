@@ -203,3 +203,76 @@ contract CryptoDrawMock {
         payable(msg.sender).transfer(commission);
     }
 }
+
+// GameLibrary wrapper for testing
+import "../GameLibrary.sol";
+
+contract GameLibraryWrapper {
+    using GameLibrary for *;
+
+    // EasyLotto functions
+    function validateEasyLottoNumbers(uint8[] memory numbers) 
+        external 
+        pure 
+        returns (bool valid) 
+    {
+        return GameLibrary.validateEasyLottoNumbers(numbers);
+    }
+
+    function packEasyLottoNumbers(uint8[] memory numbers) 
+        external 
+        pure 
+        returns (uint32 packed) 
+    {
+        return GameLibrary.packEasyLottoNumbers(numbers);
+    }
+
+    function unpackEasyLottoNumbers(uint32 packed) 
+        external 
+        pure 
+        returns (uint8[] memory numbers) 
+    {
+        return GameLibrary.unpackEasyLottoNumbers(packed);
+    }
+
+    function countEasyLottoMatches(uint32 packed1, uint32 packed2) 
+        external 
+        pure 
+        returns (uint8 count) 
+    {
+        return GameLibrary.countEasyLottoMatches(packed1, packed2);
+    }
+
+    // SuperSeven functions
+    function validateSuperSevenNumbers(uint8[] memory columns) 
+        external 
+        pure 
+        returns (bool valid) 
+    {
+        return GameLibrary.validateSuperSevenNumbers(columns);
+    }
+
+    function packSuperSevenNumbers(uint8[] memory columns) 
+        external 
+        pure 
+        returns (uint32 packed) 
+    {
+        return GameLibrary.packSuperSevenNumbers(columns);
+    }
+
+    function unpackSuperSevenNumbers(uint32 packed) 
+        external 
+        pure 
+        returns (uint8[] memory columns) 
+    {
+        return GameLibrary.unpackSuperSevenNumbers(packed);
+    }
+
+    function countSuperSevenMatches(uint32 packed1, uint32 packed2) 
+        external 
+        pure 
+        returns (uint8 count) 
+    {
+        return GameLibrary.countSuperSevenMatches(packed1, packed2);
+    }
+}
