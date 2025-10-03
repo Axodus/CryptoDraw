@@ -3,19 +3,7 @@
  * Backend API - CryptoDraw
  */
 
-// Placeholder para tipos Express (será implementado quando Express for instalado)
-interface Request {
-  params: any;
-  query: any;
-  body: any;
-  user?: any;
-}
-
-interface Response {
-  status: (code: number) => Response;
-  json: (data: any) => void;
-  send: (data: any) => void;
-}
+import type { Request, Response } from 'express';
 
 import { Ticket, GameType } from '../../models/Ticket';
 import { BlockchainService } from '../../services/BlockchainService';
@@ -37,8 +25,8 @@ export class TicketController {
 
       if (!ticketId || !this.isValidTicketId(ticketId)) {
         res.status(400).json({
-          error: 'ID do ticket inválido',
-          code: 'INVALID_TICKET_ID'
+          error: 'Invalid ticket id',
+          code: 'INVALID_TICKET_ID',
         });
         return;
       }
@@ -46,10 +34,7 @@ export class TicketController {
       const ticket = await this.blockchainService.getTicket(ticketId);
 
       if (!ticket) {
-        res.status(404).json({
-          error: 'Ticket não encontrado',
-          code: 'TICKET_NOT_FOUND'
-        });
+        res.status(404).json({ error: 'Ticket not found', code: 'TICKET_NOT_FOUND' });
         return;
       }
 
@@ -59,10 +44,10 @@ export class TicketController {
       });
 
     } catch (error) {
-      console.error('Erro ao buscar ticket:', error);
+      console.error('Error fetching ticket:', error);
       res.status(500).json({
-        error: 'Erro interno do servidor',
-        code: 'INTERNAL_SERVER_ERROR'
+        error: 'Internal server error',
+        code: 'INTERNAL_SERVER_ERROR',
       });
     }
   }
@@ -77,10 +62,7 @@ export class TicketController {
       const { game, status, limit = 50, offset = 0 } = req.query;
 
       if (!this.isValidAddress(address)) {
-        res.status(400).json({
-          error: 'Endereço inválido',
-          code: 'INVALID_ADDRESS'
-        });
+        res.status(400).json({ error: 'Invalid address', code: 'INVALID_ADDRESS' });
         return;
       }
 
@@ -89,7 +71,7 @@ export class TicketController {
       // Filtrar por jogo se especificado
       if (game !== undefined) {
         const gameType = parseInt(game);
-  if (gameType === GameType.EASYLOTTO || gameType === GameType.SUPERSEVEN) {
+        if (gameType === GameType.EASYLOTTO || gameType === GameType.SUPERSEVEN) {
           tickets = tickets.filter(ticket => ticket.game === gameType);
         }
       }
@@ -108,15 +90,15 @@ export class TicketController {
           tickets: paginatedTickets,
           total: tickets.length,
           limit: parseInt(limit),
-          offset: parseInt(offset)
+          offset: parseInt(offset),
         }
       });
 
     } catch (error) {
-      console.error('Erro ao buscar tickets do usuário:', error);
+      console.error('Error fetching user tickets:', error);
       res.status(500).json({
-        error: 'Erro interno do servidor',
-        code: 'INTERNAL_SERVER_ERROR'
+        error: 'Internal server error',
+        code: 'INTERNAL_SERVER_ERROR',
       });
     }
   }
@@ -131,28 +113,19 @@ export class TicketController {
       const { drawId } = req.query;
 
       if (!this.isValidTicketId(ticketId)) {
-        res.status(400).json({
-          error: 'ID do ticket inválido',
-          code: 'INVALID_TICKET_ID'
-        });
+        res.status(400).json({ error: 'Invalid ticket id', code: 'INVALID_TICKET_ID' });
         return;
       }
 
       if (!drawId || !this.isValidDrawId(parseInt(drawId))) {
-        res.status(400).json({
-          error: 'ID do draw inválido',
-          code: 'INVALID_DRAW_ID'
-        });
+        res.status(400).json({ error: 'Invalid draw id', code: 'INVALID_DRAW_ID' });
         return;
       }
 
       // Buscar ticket e verificar se é vencedor
       const ticket = await this.blockchainService.getTicket(ticketId);
       if (!ticket) {
-        res.status(404).json({
-          error: 'Ticket não encontrado',
-          code: 'TICKET_NOT_FOUND'
-        });
+        res.status(404).json({ error: 'Ticket not found', code: 'TICKET_NOT_FOUND' });
         return;
       }
 
@@ -163,10 +136,7 @@ export class TicketController {
       );
 
       if (!winningResult.isWinner) {
-        res.status(404).json({
-          error: 'Ticket não é vencedor neste draw',
-          code: 'NOT_A_WINNER'
-        });
+        res.status(404).json({ error: 'Ticket is not a winner in this draw', code: 'NOT_A_WINNER' });
         return;
       }
 
@@ -187,10 +157,10 @@ export class TicketController {
       });
 
     } catch (error) {
-      console.error('Erro ao buscar proof:', error);
+      console.error('Error fetching proof:', error);
       res.status(500).json({
-        error: 'Erro interno do servidor',
-        code: 'INTERNAL_SERVER_ERROR'
+        error: 'Internal server error',
+        code: 'INTERNAL_SERVER_ERROR',
       });
     }
   }
@@ -204,17 +174,14 @@ export class TicketController {
       const { numbers, game } = req.body;
 
       if (!numbers || !Array.isArray(numbers)) {
-        res.status(400).json({
-          error: 'Números são obrigatórios e devem ser um array',
-          code: 'INVALID_NUMBERS'
-        });
+        res.status(400).json({ error: 'Numbers are required and must be an array', code: 'INVALID_NUMBERS' });
         return;
       }
 
-  if (game === undefined || (game !== GameType.EASYLOTTO && game !== GameType.SUPERSEVEN)) {
+      if (game === undefined || (game !== GameType.EASYLOTTO && game !== GameType.SUPERSEVEN)) {
         res.status(400).json({
-          error: 'Tipo de jogo inválido',
-          code: 'INVALID_GAME_TYPE'
+          error: 'Invalid game type',
+          code: 'INVALID_GAME_TYPE',
         });
         return;
       }
@@ -231,10 +198,10 @@ export class TicketController {
       });
 
     } catch (error) {
-      console.error('Erro ao validar números:', error);
+      console.error('Error validating numbers:', error);
       res.status(500).json({
-        error: 'Erro interno do servidor',
-        code: 'INTERNAL_SERVER_ERROR'
+        error: 'Internal server error',
+        code: 'INTERNAL_SERVER_ERROR',
       });
     }
   }
@@ -263,7 +230,7 @@ export class TicketController {
 
   if (game === GameType.EASYLOTTO) {
       if (numbers.length !== 15) {
-  errors.push('EasyLotto deve ter exatamente 15 números');
+    errors.push('EasyLotto must have exactly 15 numbers');
       }
       
       if (numbers.some(n => n < 1 || n > 25)) {
@@ -273,13 +240,13 @@ export class TicketController {
       if (new Set(numbers).size !== numbers.length) {
         errors.push('Números devem ser únicos');
       }
-  } else if (game === GameType.SUPERSEVEN) {
+    } else if (game === GameType.SUPERSEVEN) {
       if (numbers.length !== 7) {
-  errors.push('SuperSeven deve ter exatamente 7 colunas');
+        errors.push('SuperSeven must have exactly 7 digits');
       }
       
       if (numbers.some(n => n < 0 || n > 9)) {
-        errors.push('Dígitos devem estar entre 0 e 9');
+        errors.push('Digits must be between 0 and 9');
       }
     }
 

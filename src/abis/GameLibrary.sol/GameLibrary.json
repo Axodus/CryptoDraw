@@ -1,0 +1,117 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "GameLibrary",
+  "sourceName": "contracts/GameLibrary.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "InvalidNumber",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidNumberCount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidPackedData",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "EASYLOTTO_MAX_NUMBERS",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "EASYLOTTO_MAX_VALUE",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "EASYLOTTO_MIN_NUMBERS",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "EASYLOTTO_MIN_VALUE",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SUPERSEVEN_COLUMNS",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SUPERSEVEN_MAX_VALUE",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SUPERSEVEN_MIN_VALUE",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523461001a576101319081610020823930815050f35b600080fdfe608060408181526004361015601357600080fd5b600091823560e01c9081623e52af1460e65750806333f1bd0f1460d1578063414c2b3a1460bc57806348c2d4ef1460a75780637abf745c146092578063b54fe06614607e5763b5be541b14606657600080fd5b81600319360112607a576020905160148152f35b5080fd5b5081600319360112607a5751908152602090f35b5081600319360112607a5760209051600f8152f35b5081600319360112607a576020905160098152f35b5081600319360112607a576020905160018152f35b5081600319360112607a576020905160198152f35b839081600319360112607a5780600760209252f3fea2646970667358221220e0ff7cd68af6b3ed5ed240fd006cf43e90ca6d5df70bcbd2c841b2ffa87c208964736f6c63430008120033",
+  "deployedBytecode": "0x608060408181526004361015601357600080fd5b600091823560e01c9081623e52af1460e65750806333f1bd0f1460d1578063414c2b3a1460bc57806348c2d4ef1460a75780637abf745c146092578063b54fe06614607e5763b5be541b14606657600080fd5b81600319360112607a576020905160148152f35b5080fd5b5081600319360112607a5751908152602090f35b5081600319360112607a5760209051600f8152f35b5081600319360112607a576020905160098152f35b5081600319360112607a576020905160018152f35b5081600319360112607a576020905160198152f35b839081600319360112607a5780600760209252f3fea2646970667358221220e0ff7cd68af6b3ed5ed240fd006cf43e90ca6d5df70bcbd2c841b2ffa87c208964736f6c63430008120033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
