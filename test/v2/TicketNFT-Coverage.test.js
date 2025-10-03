@@ -310,16 +310,21 @@ describe("TicketNFT - Coverage Tests", function () {
         });
 
         it("should handle batch status updates", async function () {
-            // Mint tokens
-            await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1);
-            await ticketNFT.connect(minter).mint(user1.address, 0, 54321, 1, 1);
+            // Mint tokens and capture tokenIds
+            const tx1 = await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1);
+            const r1 = await tx1.wait();
+            const id1 = r1.events.find(e => e.event === 'TicketMinted').args.tokenId;
+
+            const tx2 = await ticketNFT.connect(minter).mint(user1.address, 0, 54321, 1, 1);
+            const r2 = await tx2.wait();
+            const id2 = r2.events.find(e => e.event === 'TicketMinted').args.tokenId;
 
             // Update statuses
-            await ticketNFT.connect(minter).updateStatus(1, 1);
-            await ticketNFT.connect(minter).updateStatus(2, 2);
+            await ticketNFT.connect(minter).updateStatus(id1, 1);
+            await ticketNFT.connect(minter).updateStatus(id2, 2);
 
-            const ticket1 = await ticketNFT.getTicket(1);
-            const ticket2 = await ticketNFT.getTicket(2);
+            const ticket1 = await ticketNFT.getTicket(id1);
+            const ticket2 = await ticketNFT.getTicket(id2);
 
             expect(ticket1.status).to.equal(1);
             expect(ticket2.status).to.equal(2);
