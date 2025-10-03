@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "CryptoDraw Frontend - Decentralized Lottery on Harmony Network",
+  "author": "mzfshark",
   "keywords": [
     "lottery",
     "blockchain",
