@@ -133,10 +133,8 @@ describe("AgentProxy Contract", function () {
   });
 
   describe("Agent Deactivation", function () {
-    beforeEach(async function () {
-      const { agentProxy, owner, agent1 } = this;
-      await agentProxy.connect(owner).registerAgent(agent1.address, 500);
-    });
+    // Note: Removed beforeEach that relied on Mocha `this` context.
+    // Each test sets up its own fixture and registrations explicitly.
 
     it("Should allow owner to deactivate agent", async function () {
       const { agentProxy, owner, agent1 } = await loadFixture(deployAgentProxyFixture);
@@ -177,10 +175,7 @@ describe("AgentProxy Contract", function () {
   });
 
   describe("Ticket Purchase Through Agent", function () {
-    beforeEach(async function () {
-      const { agentProxy, owner, agent1 } = this;
-      await agentProxy.connect(owner).registerAgent(agent1.address, 500); // 5%
-    });
+    // Note: Removed beforeEach; tests perform their own fixture setup.
 
     it("Should allow buying ticket through registered agent", async function () {
       const { agentProxy, owner, agent1, user1, cryptoDrawMock } = await loadFixture(deployAgentProxyFixture);
@@ -377,23 +372,7 @@ describe("AgentProxy Contract", function () {
   });
 
   describe("Commission Withdrawal", function () {
-    beforeEach(async function () {
-      const { agentProxy, owner, agent1, user1, cryptoDrawMock } = this;
-      
-      // Setup agent and make a purchase to generate commission
-      await agentProxy.connect(owner).registerAgent(agent1.address, 1000); // 10%
-      
-      const ticketPrice = ethers.utils.parseEther("2");
-      await cryptoDrawMock.setTicketPrice(ticketPrice);
-      
-      await agentProxy.connect(user1).buyTicketThroughAgent(
-        1, // gameType
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // numbers
-        1, // rounds
-        agent1.address,
-        { value: ticketPrice }
-      );
-    });
+    // Note: Removed beforeEach; each test now creates its own commission scenario.
 
     it("Should allow agents to withdraw their commissions", async function () {
       const { agentProxy, owner, agent1, user1, cryptoDrawMock } = await loadFixture(deployAgentProxyFixture);

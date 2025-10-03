@@ -89,7 +89,7 @@ export class TicketController {
       // Filtrar por jogo se especificado
       if (game !== undefined) {
         const gameType = parseInt(game);
-        if (gameType === GameType.LOTOFACIL || gameType === GameType.SUPERSETE) {
+  if (gameType === GameType.EASYLOTTO || gameType === GameType.SUPERSEVEN) {
           tickets = tickets.filter(ticket => ticket.game === gameType);
         }
       }
@@ -211,7 +211,7 @@ export class TicketController {
         return;
       }
 
-      if (game === undefined || (game !== GameType.LOTOFACIL && game !== GameType.SUPERSETE)) {
+  if (game === undefined || (game !== GameType.EASYLOTTO && game !== GameType.SUPERSEVEN)) {
         res.status(400).json({
           error: 'Tipo de jogo inválido',
           code: 'INVALID_GAME_TYPE'
@@ -261,9 +261,9 @@ export class TicketController {
   } {
     const errors: string[] = [];
 
-    if (game === GameType.LOTOFACIL) {
+  if (game === GameType.EASYLOTTO) {
       if (numbers.length !== 15) {
-        errors.push('Lotofácil deve ter exatamente 15 números');
+  errors.push('EasyLotto deve ter exatamente 15 números');
       }
       
       if (numbers.some(n => n < 1 || n > 25)) {
@@ -273,9 +273,9 @@ export class TicketController {
       if (new Set(numbers).size !== numbers.length) {
         errors.push('Números devem ser únicos');
       }
-    } else if (game === GameType.SUPERSETE) {
+  } else if (game === GameType.SUPERSEVEN) {
       if (numbers.length !== 7) {
-        errors.push('SuperSete deve ter exatamente 7 colunas');
+  errors.push('SuperSeven deve ter exatamente 7 colunas');
       }
       
       if (numbers.some(n => n < 0 || n > 9)) {

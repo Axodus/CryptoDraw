@@ -8,13 +8,13 @@ import { GameType } from '../models/Ticket';
 
 export class NumberPacking {
   /**
-   * Lotofácil: 15 números únicos em range 1-25
+   * EasyLotto: 15 números únicos em range 1-25
    * Usa bitmask de 25 bits para representar números selecionados
    * Bit i = 1 se número (i+1) foi selecionado
    */
-  static packLotofacil(numbers: number[]): number {
-    if (!this.validateLotofasilNumbers(numbers)) {
-      throw new Error('Números inválidos para Lotofácil');
+  static packEasyLotto(numbers: number[]): number {
+    if (!this.validateEasyLottoNumbers(numbers)) {
+      throw new Error('Números inválidos para EasyLotto');
     }
 
     let bitmask = 0;
@@ -24,7 +24,7 @@ export class NumberPacking {
     return bitmask;
   }
 
-  static unpackLotofacil(packed: number): number[] {
+  static unpackEasyLotto(packed: number): number[] {
     const numbers: number[] = [];
     for (let i = 0; i < 25; i++) {
       if (packed & (1 << i)) {
@@ -35,13 +35,13 @@ export class NumberPacking {
   }
 
   /**
-   * SuperSete: 7 colunas, cada uma com dígito 0-9
+  * SuperSeven: 7 colunas, cada uma com dígito 0-9
    * Usa 4 bits por coluna (28 bits total)
    * Coluna i ocupa bits [i*4, i*4+3]
    */
-  static packSupersete(columns: number[]): number {
-    if (!this.validateSuperseteNumbers(columns)) {
-      throw new Error('Números inválidos para SuperSete');
+  static packSuperSeven(columns: number[]): number {
+    if (!this.validateSuperSevenNumbers(columns)) {
+      throw new Error('Números inválidos para SuperSeven');
     }
 
     let packed = 0;
@@ -51,7 +51,7 @@ export class NumberPacking {
     return packed;
   }
 
-  static unpackSupersete(packed: number): number[] {
+  static unpackSuperSeven(packed: number): number[] {
     const columns: number[] = [];
     for (let i = 0; i < 7; i++) {
       columns.push((packed >> (i * 4)) & 0xF);
@@ -64,10 +64,10 @@ export class NumberPacking {
    */
   static packNumbers(numbers: number[], game: GameType): number {
     switch (game) {
-      case GameType.LOTOFACIL:
-        return this.packLotofacil(numbers);
-      case GameType.SUPERSETE:
-        return this.packSupersete(numbers);
+      case GameType.EASYLOTTO:
+        return this.packEasyLotto(numbers);
+      case GameType.SUPERSEVEN:
+        return this.packSuperSeven(numbers);
       default:
         throw new Error(`Tipo de jogo não suportado: ${game}`);
     }
@@ -78,10 +78,10 @@ export class NumberPacking {
    */
   static unpackNumbers(packed: number, game: GameType): number[] {
     switch (game) {
-      case GameType.LOTOFACIL:
-        return this.unpackLotofacil(packed);
-      case GameType.SUPERSETE:
-        return this.unpackSupersete(packed);
+      case GameType.EASYLOTTO:
+        return this.unpackEasyLotto(packed);
+      case GameType.SUPERSEVEN:
+        return this.unpackSuperSeven(packed);
       default:
         throw new Error(`Tipo de jogo não suportado: ${game}`);
     }
@@ -90,7 +90,7 @@ export class NumberPacking {
   /**
    * Validações
    */
-  static validateLotofasilNumbers(numbers: number[]): boolean {
+  static validateEasyLottoNumbers(numbers: number[]): boolean {
     // Deve ter exatamente 15 números
     if (numbers.length !== 15) return false;
     
@@ -103,7 +103,7 @@ export class NumberPacking {
     return true;
   }
 
-  static validateSuperseteNumbers(columns: number[]): boolean {
+  static validateSuperSevenNumbers(columns: number[]): boolean {
     // Deve ter exatamente 7 colunas
     if (columns.length !== 7) return false;
     
@@ -116,18 +116,18 @@ export class NumberPacking {
   /**
    * Utilitários de conversão para display
    */
-  static formatLotofasilNumbers(numbers: number[]): string {
+  static formatEasyLottoNumbers(numbers: number[]): string {
     return numbers.sort((a, b) => a - b).join(' - ');
   }
 
-  static formatSuperseteNumbers(columns: number[]): string {
+  static formatSuperSevenNumbers(columns: number[]): string {
     return columns.join(' | ');
   }
 
   /**
    * Geração de números aleatórios (Quick Pick)
    */
-  static generateRandomLotofacil(): number[] {
+  static generateRandomEasyLotto(): number[] {
     const numbers: number[] = [];
     while (numbers.length < 15) {
       const num = Math.floor(Math.random() * 25) + 1;
@@ -138,11 +138,23 @@ export class NumberPacking {
     return numbers.sort((a, b) => a - b);
   }
 
-  static generateRandomSupersete(): number[] {
+  static generateRandomSuperSeven(): number[] {
     const columns: number[] = [];
     for (let i = 0; i < 7; i++) {
       columns.push(Math.floor(Math.random() * 10));
     }
     return columns;
   }
+
+  // ---------- Aliases para compatibilidade legada ----------
+  static packLotofacil(numbers: number[]): number { return this.packEasyLotto(numbers); }
+  static unpackLotofacil(packed: number): number[] { return this.unpackEasyLotto(packed); }
+  static packSupersete(columns: number[]): number { return this.packSuperSeven(columns); }
+  static unpackSupersete(packed: number): number[] { return this.unpackSuperSeven(packed); }
+  static validateLotofasilNumbers(numbers: number[]): boolean { return this.validateEasyLottoNumbers(numbers); }
+  static validateSuperseteNumbers(columns: number[]): boolean { return this.validateSuperSevenNumbers(columns); }
+  static formatLotofasilNumbers(numbers: number[]): string { return this.formatEasyLottoNumbers(numbers); }
+  static formatSuperseteNumbers(columns: number[]): string { return this.formatSuperSevenNumbers(columns); }
+  static generateRandomLotofacil(): number[] { return this.generateRandomEasyLotto(); }
+  static generateRandomSupersete(): number[] { return this.generateRandomSuperSeven(); }
 }

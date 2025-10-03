@@ -4,6 +4,9 @@
  */
 
 export enum GameType {
+  EASYLOTTO = 0,
+  SUPERSEVEN = 1,
+  // Aliases legados para compatibilidade
   LOTOFACIL = 0,
   SUPERSETE = 1,
 }
@@ -28,7 +31,7 @@ export enum DrawStatus {
 export interface Ticket {
   id: string;                    // ticketId on-chain
   owner: string;                 // address
-  game: GameType;               // LOTOFACIL | SUPERSETE
+  game: GameType;               // EASYLOTTO | SUPERSEVEN
   numbers: number[];            // números escolhidos
   numbersPacked: string;        // representação compacta
   roundsBought: number;

@@ -9,7 +9,7 @@ Testa a primeira versão do contrato CryptoDraw com funcionalidades básicas:
 
 **Principais Categorias Testadas:**
 - ✅ **Deployment**: Verificação de inicialização correta
-- ✅ **Compra de Ingressos**: Lotofácil e SuperSete
+- ✅ **Compra de Ingressos**: EasyLotto e SuperSeven
 - ✅ **Gerenciamento de Sorteios**: Criação, fechamento e execução
 - ✅ **Distribuição de Prêmios**: Cálculos e pagamentos
 - ✅ **Sistema de Agentes**: Comissões e retiradas
@@ -28,7 +28,7 @@ Testa a primeira versão do contrato CryptoDraw com funcionalidades básicas:
 Testa a versão aprimorada do contrato com funcionalidades avançadas:
 
 **Principais Categorias Testadas:**
-- ✅ **Configuração de Jogos**: SuperSete e EasyLotto
+- ✅ **Configuração de Jogos**: SuperSeven e EasyLotto
 - ✅ **Gestão de Tokens de Pagamento**: ETH nativo e ERC20
 - ✅ **Gerenciamento de Sorteios**: Ciclo completo otimizado
 - ✅ **Sistema de Agentes Avançado**: Suspensão e comissões dinâmicas
@@ -83,7 +83,7 @@ Testa fluxos completos entre todos os contratos:
 
 **Principais Cenários Testados:**
 - ✅ **Ciclo Completo de Loteria**: Do ticket ao prêmio
-- ✅ **Sistema Multi-Jogos**: Lotofácil e SuperSete simultâneos
+- ✅ **Sistema Multi-Jogos**: EasyLotto e SuperSeven simultâneos
 - ✅ **Integração de Agentes**: Fluxos completos com comissões
 - ✅ **Distribuição de Prêmios**: Múltiplas categorias e ganhadores
 - ✅ **Segurança Integrada**: Controles de acesso em todo o sistema
@@ -133,7 +133,7 @@ Testa fluxos completos entre todos os contratos:
 - ✅ Oracles de preço integrados
 
 ### 🎮 Jogos Suportados
-- ✅ **SuperSete**: 7 números (0-9)
+- ✅ **SuperSeven**: 7 números (0-9)
 - ✅ **EasyLotto**: 15 números (1-25)
 - ✅ **Múltiplas Rodadas**: Tickets para múltiplos sorteios
 - ✅ **Configuração Dinâmica**: Preços e intervalos ajustáveis

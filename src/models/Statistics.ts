@@ -49,8 +49,8 @@ export interface UserStatistics {
   winRate: number;
   favoriteNumbers: number[];
   gamesPlayed: {
-    [GameType.LOTOFACIL]: GameUserStats;
-    [GameType.SUPERSETE]: GameUserStats;
+  [GameType.EASYLOTTO]: GameUserStats;
+  [GameType.SUPERSEVEN]: GameUserStats;
   };
 }
 

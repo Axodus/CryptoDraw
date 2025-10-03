@@ -1,9 +1,9 @@
 require('@nomiclabs/hardhat-ethers');
-// Register Hardhat Chai Matchers for improved assertions (reverted, emitted, etc.)
+// Register Waffle matchers (ethers v5 compatible)
 try {
-  require('@nomicfoundation/hardhat-chai-matchers');
+  require('@nomiclabs/hardhat-waffle');
 } catch (e) {
-  console.log('Warning: @nomicfoundation/hardhat-chai-matchers not installed');
+  console.log('Warning: @nomiclabs/hardhat-waffle not installed');
 }
 require('dotenv').config();
 

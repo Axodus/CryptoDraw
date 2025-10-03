@@ -8,9 +8,9 @@
 .env.local
 .env.*.local
 
-# Keep template files (these are safe to commit)
+# Keep template files (these are safe to commit). Ensure real secrets stay only in .env or local overrides.
 # .env.example
-# .env.development  
+# .env.development
 # .env.production
 
 # Private keys and sensitive data
@@ -36,4 +36,5 @@ tokens.json
 node_modules/
 
 # Build artifacts
-artifacts
+artifacts/
+cache/
