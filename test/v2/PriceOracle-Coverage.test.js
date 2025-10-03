@@ -58,13 +58,13 @@ describe("PriceOracle - Coverage Tests", function () {
         it("should revert when adding zero address token", async function () {
             await expect(
                 priceOracle.addToken(ethers.constants.AddressZero, 18, ethers.utils.parseEther("1"))
-            ).to.be.revertedWith("Cannot add native token using addToken");
+            ).to.be.revertedWith("Use native ONE");
         });
 
         it("should revert when adding token with zero price", async function () {
             await expect(
                 priceOracle.addToken(mockToken.address, 18, 0)
-            ).to.be.revertedWith("Price must be greater than 0");
+            ).to.be.revertedWithCustomError(priceOracle, "InvalidPrice");
         });
 
         it("should revert when adding duplicate token", async function () {
@@ -72,7 +72,7 @@ describe("PriceOracle - Coverage Tests", function () {
             
             await expect(
                 priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("2"))
-            ).to.be.revertedWith("Token already exists");
+            ).to.be.revertedWith("Token already supported");
         });
 
         it("should handle token with different decimals", async function () {
@@ -119,21 +119,27 @@ describe("PriceOracle - Coverage Tests", function () {
             const nonExistentToken = await NonExistentToken.deploy("Non Existent", "NE", 18);
 
             await expect(
-                priceOracle.connect(operator).updatePrice(nonExistentToken.address, ethers.utils.parseEther("1"))
-            ).to.be.revertedWith("Token not supported");
+                priceOracle.connect(owner).updatePrice(nonExistentToken.address, ethers.utils.parseEther("1"))
+            ).to.be.revertedWithCustomError(priceOracle, "TokenNotSupported");
         });
 
         it("should revert when updating with zero price", async function () {
+            // First add the token
+            await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
+            
             await expect(
-                priceOracle.connect(operator).updatePrice(mockToken.address, 0)
-            ).to.be.revertedWith("Price must be greater than 0");
+                priceOracle.connect(owner).updatePrice(mockToken.address, 0)
+            ).to.be.revertedWithCustomError(priceOracle, "InvalidPrice");
         });
 
         it("should handle maximum price values", async function () {
             const maxPrice = ethers.constants.MaxUint256.div(1000000); // Avoid overflow in calculations
             
+            // First add the token
+            await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
+            
             await expect(
-                priceOracle.connect(operator).updatePrice(mockToken.address, maxPrice)
+                priceOracle.connect(owner).updatePrice(mockToken.address, maxPrice)
             ).to.not.be.reverted;
 
             const tokenInfo = await priceOracle.tokens(mockToken.address);
@@ -238,9 +244,8 @@ describe("PriceOracle - Coverage Tests", function () {
     describe("Native Token Handling", function () {
         it("should handle native token operations", async function () {
             // Native token should be pre-configured
-            const nativeInfo = await priceOracle.tokens(ethers.constants.AddressZero);
-            expect(nativeInfo.decimals).to.equal(18);
-            expect(nativeInfo.priceUSD).to.be.gt(0);
+            const nativePrice = await priceOracle.getPrice(ethers.constants.AddressZero);
+            expect(nativePrice).to.be.gt(0);
 
             // Test conversions
             await expect(
@@ -254,11 +259,11 @@ describe("PriceOracle - Coverage Tests", function () {
 
         it("should allow updating native token price", async function () {
             await expect(
-                priceOracle.connect(operator).updatePrice(ethers.constants.AddressZero, ethers.utils.parseEther("3000"))
+                priceOracle.connect(owner).updatePrice(ethers.constants.AddressZero, ethers.utils.parseEther("3000"))
             ).to.not.be.reverted;
 
-            const nativeInfo = await priceOracle.tokens(ethers.constants.AddressZero);
-            expect(nativeInfo.priceUSD).to.equal(ethers.utils.parseEther("3000"));
+            const nativePrice = await priceOracle.getPrice(ethers.constants.AddressZero);
+            expect(nativePrice).to.equal(ethers.utils.parseEther("3000"));
         });
     });
 

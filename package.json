@@ -86,6 +86,7 @@
     "vercel:dev": "vercel dev"
   },
   "dependencies": {
+    "@ensdomains/ens-contracts": "^1.6.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.12",
     "@openzeppelin/contracts": "4.9.6",
     "@reown/appkit": "^1.0.6",

@@ -155,7 +155,7 @@ describe("TicketNFT - Coverage Tests", function () {
         });
 
         it("should update status correctly", async function () {
-            await ticketNFT.connect(operator).updateStatus(tokenId, 1); // EXPIRED
+            await ticketNFT.connect(minter).updateStatus(tokenId, 1); // EXPIRED
 
             const ticket = await ticketNFT.getTicket(tokenId);
             expect(ticket.status).to.equal(1);
@@ -163,7 +163,7 @@ describe("TicketNFT - Coverage Tests", function () {
 
         it("should emit event on status update", async function () {
             await expect(
-                ticketNFT.connect(operator).updateStatus(tokenId, 2)
+                ticketNFT.connect(minter).updateStatus(tokenId, 2)
             ).to.emit(ticketNFT, "StatusUpdated")
               .withArgs(tokenId, 2);
         });
@@ -172,7 +172,7 @@ describe("TicketNFT - Coverage Tests", function () {
             // ACTIVE = 0, EXPIRED = 1, REDEEMED = 2, BURNED = 3
             for (let status = 0; status <= 3; status++) {
                 await expect(
-                    ticketNFT.connect(operator).updateStatus(tokenId, status)
+                    ticketNFT.connect(minter).updateStatus(tokenId, status)
                 ).to.not.be.reverted;
 
                 const ticket = await ticketNFT.getTicket(tokenId);
@@ -182,7 +182,7 @@ describe("TicketNFT - Coverage Tests", function () {
 
         it("should revert for non-existent token", async function () {
             await expect(
-                ticketNFT.connect(operator).updateStatus(999999, 1)
+                ticketNFT.connect(minter).updateStatus(999999, 1)
             ).to.be.revertedWithCustomError(ticketNFT, "TokenNotExists");
         });
     });
@@ -197,7 +197,7 @@ describe("TicketNFT - Coverage Tests", function () {
         });
 
         it("should burn token correctly", async function () {
-            await ticketNFT.connect(operator).burn(tokenId);
+            await ticketNFT.connect(minter).burn(tokenId);
 
             await expect(
                 ticketNFT.ownerOf(tokenId)
@@ -206,22 +206,22 @@ describe("TicketNFT - Coverage Tests", function () {
 
         it("should emit burn event", async function () {
             await expect(
-                ticketNFT.connect(operator).burn(tokenId)
+                ticketNFT.connect(minter).burn(tokenId)
             ).to.emit(ticketNFT, "Transfer")
               .withArgs(user1.address, ethers.constants.AddressZero, tokenId);
         });
 
         it("should revert when burning non-existent token", async function () {
             await expect(
-                ticketNFT.connect(operator).burn(999999)
+                ticketNFT.connect(minter).burn(999999)
             ).to.be.revertedWithCustomError(ticketNFT, "TokenNotExists");
         });
 
         it("should revert when burning already burned token", async function () {
-            await ticketNFT.connect(operator).burn(tokenId);
+            await ticketNFT.connect(minter).burn(tokenId);
 
             await expect(
-                ticketNFT.connect(operator).burn(tokenId)
+                ticketNFT.connect(minter).burn(tokenId)
             ).to.be.revertedWith("ERC721: invalid token ID");
         });
     });
@@ -236,7 +236,7 @@ describe("TicketNFT - Coverage Tests", function () {
         });
 
         it("should decrement rounds remaining", async function () {
-            await ticketNFT.connect(operator).decrementRounds(tokenId);
+            await ticketNFT.connect(minter).decrementRounds(tokenId);
 
             const ticket = await ticketNFT.getTicket(tokenId);
             expect(ticket.roundsRemaining).to.equal(4);
@@ -244,7 +244,7 @@ describe("TicketNFT - Coverage Tests", function () {
 
         it("should emit event on rounds decrement", async function () {
             await expect(
-                ticketNFT.connect(operator).decrementRounds(tokenId)
+                ticketNFT.connect(minter).decrementRounds(tokenId)
             ).to.emit(ticketNFT, "RoundsDecremented")
               .withArgs(tokenId, 4);
         });
@@ -252,17 +252,17 @@ describe("TicketNFT - Coverage Tests", function () {
         it("should revert when decrementing zero rounds", async function () {
             // Decrement to zero
             for (let i = 0; i < 5; i++) {
-                await ticketNFT.connect(operator).decrementRounds(tokenId);
+                await ticketNFT.connect(minter).decrementRounds(tokenId);
             }
 
             await expect(
-                ticketNFT.connect(operator).decrementRounds(tokenId)
+                ticketNFT.connect(minter).decrementRounds(tokenId)
             ).to.be.revertedWith("No rounds remaining");
         });
 
         it("should revert for non-existent token", async function () {
             await expect(
-                ticketNFT.connect(operator).decrementRounds(999999)
+                ticketNFT.connect(minter).decrementRounds(999999)
             ).to.be.revertedWithCustomError(ticketNFT, "TokenNotExists");
         });
     });
@@ -315,8 +315,8 @@ describe("TicketNFT - Coverage Tests", function () {
             await ticketNFT.connect(minter).mint(user1.address, 0, 54321, 1, 1);
 
             // Update statuses
-            await ticketNFT.connect(operator).updateStatus(1, 1);
-            await ticketNFT.connect(operator).updateStatus(2, 2);
+            await ticketNFT.connect(minter).updateStatus(1, 1);
+            await ticketNFT.connect(minter).updateStatus(2, 2);
 
             const ticket1 = await ticketNFT.getTicket(1);
             const ticket2 = await ticketNFT.getTicket(2);
