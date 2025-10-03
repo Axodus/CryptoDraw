@@ -1,4 +1,4 @@
-## CryptoDraw
+## CryptoDraw | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/cb5a0c53ec754a328195c831f536a27b)](https://app.codacy.com/gh/Axodus/CryptoDraw/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 On-chain lottery platform with NFT tickets, oracle-based pricing, and a built-in agent commission system. CryptoDraw currently supports two games: SuperSeven and EasyLotto.
 
