@@ -22,9 +22,7 @@ describe("PriceOracle - Coverage Tests", function () {
         const MockToken = await ethers.getContractFactory("MockToken");
         mockToken = await MockToken.deploy("Mock Token", "MOCK", 18);
 
-        // Grant operator role
-        const OPERATOR_ROLE = await priceOracle.OPERATOR_ROLE();
-        await priceOracle.grantRole(OPERATOR_ROLE, operator.address);
+        // PriceOracle uses Ownable, no operator role needed for basic setup
     });
 
     describe("Access Control - onlyOwner modifier", function () {
@@ -39,13 +37,11 @@ describe("PriceOracle - Coverage Tests", function () {
         });
     });
 
-    describe("Access Control - onlyOperator modifier", function () {
-        it("should revert when non-operator calls operator functions", async function () {
-            const OPERATOR_ROLE = await priceOracle.OPERATOR_ROLE();
-
+    describe("Access Control - onlyOwner for operator functions", function () {
+        it("should revert when non-owner calls updatePrice", async function () {
             await expect(
                 priceOracle.connect(user1).updatePrice(mockToken.address, ethers.utils.parseEther("2"))
-            ).to.be.revertedWith(`AccessControl: account ${user1.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`);
+            ).to.be.revertedWith("Ownable: caller is not the owner");
         });
 
         it("should allow operator to call operator functions", async function () {

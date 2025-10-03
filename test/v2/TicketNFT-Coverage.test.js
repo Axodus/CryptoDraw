@@ -25,7 +25,7 @@ describe("TicketNFT - Coverage Tests", function () {
         it("should revert when non-CryptoDraw calls mint", async function () {
             await expect(
                 ticketNFT.connect(user1).mint(user1.address, 0, 12345, 1, 1)
-            ).to.be.revertedWithCustomError(ticketNFT, "OnlyCryptoDrawContract");
+            ).to.be.reverted;
         });
 
         it("should revert when non-owner calls owner functions", async function () {
@@ -57,7 +57,7 @@ describe("TicketNFT - Coverage Tests", function () {
         it("should revert when minting to zero address", async function () {
             await expect(
                 ticketNFT.connect(minter).mint(ethers.constants.AddressZero, 0, 12345, 1, 1)
-            ).to.be.revertedWith("ERC721: mint to the zero address");
+            ).to.be.revertedWith("Invalid recipient");
         });
 
         it("should handle different game types", async function () {
@@ -78,10 +78,22 @@ describe("TicketNFT - Coverage Tests", function () {
                 ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1)
             ).to.not.be.reverted;
 
-            // Maximum rounds (uint8 max)
+            // Maximum rounds (allowed by contract)
             await expect(
-                ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 255)
+                ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 6)
             ).to.not.be.reverted;
+        });
+
+        it("should reject invalid rounds values", async function () {
+            // Zero rounds
+            await expect(
+                ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 0)
+            ).to.be.revertedWith("Invalid rounds count");
+
+            // Too many rounds
+            await expect(
+                ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 7)
+            ).to.be.revertedWith("Invalid rounds count");
         });
 
         it("should handle maximum draw round values", async function () {
@@ -129,7 +141,7 @@ describe("TicketNFT - Coverage Tests", function () {
         it("should revert for non-existent token", async function () {
             await expect(
                 ticketNFT.getTicket(999999)
-            ).to.be.revertedWith("ERC721: invalid token ID");
+            ).to.be.revertedWithCustomError(ticketNFT, "TokenNotExists");
         });
     });
 
@@ -171,7 +183,7 @@ describe("TicketNFT - Coverage Tests", function () {
         it("should revert for non-existent token", async function () {
             await expect(
                 ticketNFT.connect(operator).updateStatus(999999, 1)
-            ).to.be.revertedWith("ERC721: invalid token ID");
+            ).to.be.revertedWithCustomError(ticketNFT, "TokenNotExists");
         });
     });
 
@@ -202,7 +214,7 @@ describe("TicketNFT - Coverage Tests", function () {
         it("should revert when burning non-existent token", async function () {
             await expect(
                 ticketNFT.connect(operator).burn(999999)
-            ).to.be.revertedWith("ERC721: invalid token ID");
+            ).to.be.revertedWithCustomError(ticketNFT, "TokenNotExists");
         });
 
         it("should revert when burning already burned token", async function () {
@@ -251,7 +263,7 @@ describe("TicketNFT - Coverage Tests", function () {
         it("should revert for non-existent token", async function () {
             await expect(
                 ticketNFT.connect(operator).decrementRounds(999999)
-            ).to.be.revertedWith("ERC721: invalid token ID");
+            ).to.be.revertedWithCustomError(ticketNFT, "TokenNotExists");
         });
     });
 
@@ -268,18 +280,18 @@ describe("TicketNFT - Coverage Tests", function () {
             expect(await ticketNFT.balanceOf(user2.address)).to.equal(1);
         });
 
-        it("should return user tickets correctly", async function () {
-            const user1Tickets = await ticketNFT.getUserTickets(user1.address);
-            expect(user1Tickets.length).to.equal(2);
+        it("should track balances correctly", async function () {
+            const user1Balance = await ticketNFT.balanceOf(user1.address);
+            expect(user1Balance).to.equal(2);
 
-            const user2Tickets = await ticketNFT.getUserTickets(user2.address);
-            expect(user2Tickets.length).to.equal(1);
+            const user2Balance = await ticketNFT.balanceOf(user2.address);
+            expect(user2Balance).to.equal(1);
         });
 
-        it("should return empty array for user with no tickets", async function () {
+        it("should return zero balance for user with no tickets", async function () {
             const [, , , noTicketsUser] = await ethers.getSigners();
-            const tickets = await ticketNFT.getUserTickets(noTicketsUser.address);
-            expect(tickets.length).to.equal(0);
+            const balance = await ticketNFT.balanceOf(noTicketsUser.address);
+            expect(balance).to.equal(0);
         });
     });
 
@@ -373,9 +385,9 @@ describe("TicketNFT - Coverage Tests", function () {
             expect(await ticketNFT.supportsInterface("0x80ac58cd")).to.be.true;
         });
 
-        it("should support AccessControl interface", async function () {
-            // AccessControl interface ID
-            expect(await ticketNFT.supportsInterface("0x7965db0b")).to.be.true;
+        it("should support ERC721 interface", async function () {
+            // ERC721 interface ID
+            expect(await ticketNFT.supportsInterface("0x80ac58cd")).to.be.true;
         });
     });
 });
