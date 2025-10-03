@@ -1,3 +1,5 @@
+const { skip } = require('node:test');
+
 require('@nomiclabs/hardhat-ethers');
 // Register Waffle matchers (ethers v5 compatible)
 try {
@@ -31,6 +33,9 @@ module.exports = {
       viaIR: true, // Enable IR compilation to avoid "Stack too deep" errors
       evmVersion: "paris" // Harmony supports up to Paris EVM
     }
+  },
+  coverage: {
+    skipFiles: ["mocks/", "test/"],
   },
   networks: {
     hardhat: {
