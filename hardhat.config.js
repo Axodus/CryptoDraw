@@ -1,9 +1,23 @@
+const { skip } = require('node:test');
+
 require('@nomiclabs/hardhat-ethers');
 // Register Waffle matchers (ethers v5 compatible)
 try {
   require('@nomiclabs/hardhat-waffle');
 } catch (e) {
   console.log('Warning: @nomiclabs/hardhat-waffle not installed');
+}
+// Register chai matchers for custom errors
+try {
+  require('@nomicfoundation/hardhat-chai-matchers');
+} catch (e) {
+  console.log('Warning: @nomicfoundation/hardhat-chai-matchers not installed');
+}
+// Register coverage plugin
+try {
+  require('solidity-coverage');
+} catch (e) {
+  console.log('Warning: solidity-coverage not available');
 }
 require('dotenv').config();
 
@@ -25,6 +39,9 @@ module.exports = {
       viaIR: true, // Enable IR compilation to avoid "Stack too deep" errors
       evmVersion: "paris" // Harmony supports up to Paris EVM
     }
+  },
+  coverage: {
+    skipFiles: ["mocks/", "test/"],
   },
   networks: {
     hardhat: {

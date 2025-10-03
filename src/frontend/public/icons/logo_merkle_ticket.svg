@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+<path d="M124 140 h264 a24 24 0 0 1 24 24 v64 c-16 0 -28 12 -28 28s12 28 28 28 v64 a24 24 0 0 1 -24 24 h-264 a24 24 0 0 1 -24 -24 v-64 c16 0 28 -12 28 -28s-12 -28 -28 -28 v-64 a24 24 0 0 1 24 -24 z" stroke="#00E6E6" stroke-width="16" fill="none" stroke-linejoin="round"/>
+<circle cx="176" cy="196" r="12" fill="#00E6E6" />
+<circle cx="256" cy="196" r="12" fill="#00E6E6" />
+<circle cx="336" cy="196" r="12" fill="#00E6E6" />
+<circle cx="216" cy="256" r="12" fill="#00E6E6" />
+<circle cx="296" cy="256" r="12" fill="#00E6E6" />
+<circle cx="176" cy="316" r="12" fill="#00E6E6" />
+<circle cx="256" cy="316" r="12" fill="#00E6E6" />
+<circle cx="336" cy="316" r="12" fill="#00E6E6" />
+<line x1="176" y1="196" x2="216" y2="256" stroke="#00E6E6" stroke-width="6" opacity="0.85"/>
+<line x1="256" y1="196" x2="216" y2="256" stroke="#00E6E6" stroke-width="6" opacity="0.85"/>
+<line x1="256" y1="196" x2="296" y2="256" stroke="#00E6E6" stroke-width="6" opacity="0.85"/>
+<line x1="336" y1="196" x2="296" y2="256" stroke="#00E6E6" stroke-width="6" opacity="0.85"/>
+<line x1="176" y1="316" x2="216" y2="256" stroke="#00E6E6" stroke-width="6" opacity="0.85"/>
+<line x1="256" y1="316" x2="216" y2="256" stroke="#00E6E6" stroke-width="6" opacity="0.85"/>
+<line x1="256" y1="316" x2="296" y2="256" stroke="#00E6E6" stroke-width="6" opacity="0.85"/>
+<line x1="336" y1="316" x2="296" y2="256" stroke="#00E6E6" stroke-width="6" opacity="0.85"/>
+<path d="M 360 238 Q 366.3 249.7 378 256 Q 366.3 262.3 360 274 Q 353.7 262.3 342 256 Q 353.7 249.7 360 238 Z" fill="#B4FF00"/></svg>

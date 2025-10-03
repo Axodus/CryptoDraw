@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 const { loadFixture, time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("CryptoDrawV2 Contract", function () {
-  // Fixture de deploy
+  // Deployment fixture
   async function deployCryptoDrawV2Fixture() {
     const [owner, operator, agent, user1, user2, user3] = await ethers.getSigners();
     
@@ -20,14 +20,14 @@ describe("CryptoDrawV2 Contract", function () {
     const TicketNFT = await ethers.getContractFactory("TicketNFT");
     const ticketNFT = await TicketNFT.deploy();
     
-    // Wallets de destino
+  // Destination wallets
     const treasuryWallet = owner.address;
     const prizeWallet = owner.address;
     const projectFund = owner.address;
     const grantFund = owner.address;
     const operationFund = owner.address;
     
-    // Deploy CryptoDrawV2 (sem linking explícito de GameLibrary)
+  // Deploy CryptoDrawV2 (no explicit GameLibrary linking required)
     const CryptoDrawV2 = await ethers.getContractFactory("contracts/CryptoDrawV2.sol:CryptoDraw");
     
     const cryptoDrawV2 = await CryptoDrawV2.deploy(
@@ -47,10 +47,10 @@ describe("CryptoDrawV2 Contract", function () {
     await cryptoDrawV2.grantRole(OPERATOR_ROLE, operator.address);
     await cryptoDrawV2.grantRole(AGENT_ROLE, agent.address);
     
-    // Configure TicketNFT minter
+  // Configure TicketNFT minter
     await ticketNFT.setCryptoDrawAddress(cryptoDrawV2.address);
 
-    // Habilitar token nativo ONE
+  // Enable native ONE token
     await cryptoDrawV2.setSupportedToken(ethers.constants.AddressZero, true);
     
     return {
@@ -100,10 +100,10 @@ describe("CryptoDrawV2 Contract", function () {
   });
 
   describe("Game Configuration", function () {
-    it("Should allow admin to configure SuperSete game", async function () {
+    it("Should allow admin to configure SuperSeven game", async function () {
       const { cryptoDrawV2, owner } = await loadFixture(deployCryptoDrawV2Fixture);
       
-      const gameType = 0; // SUPERSETE
+  const gameType = 0; // SUPERSEVEN
       const ticketPriceUSD = ethers.utils.parseEther("1"); // $1
       const drawInterval = 24 * 60 * 60; // 1 day
       
@@ -140,12 +140,12 @@ describe("CryptoDrawV2 Contract", function () {
       expect(config.enabled).to.be.true;
     });
 
-    it("Should prevent non-admin from configuring games", async function () {
+  it("Should prevent non-admin from configuring games", async function () {
       const { cryptoDrawV2, user1 } = await loadFixture(deployCryptoDrawV2Fixture);
       
       await expect(
         cryptoDrawV2.connect(user1).setGameConfig(
-          0, // SUPERSETE
+          0, // SUPERSEVEN
           ethers.utils.parseEther("1"),
           24 * 60 * 60,
           true
@@ -207,13 +207,13 @@ describe("CryptoDrawV2 Contract", function () {
   });
 
   describe("Draw Management", function () {
-    // Removido beforeEach que usava o contexto `this` e reimplantava contrato desnecessariamente.
+    // Removed beforeEach that used Mocha `this` context and redeployed unnecessarily.
 
     it("Should allow operator to create new draw", async function () {
       const { cryptoDrawV2, operator } = await loadFixture(deployCryptoDrawV2Fixture);
   await cryptoDrawV2.setGameConfig(0, ethers.utils.parseEther("1"), 24 * 60 * 60, true);
       
-      const gameType = 0; // SUPERSETE
+  const gameType = 0; // SUPERSEVEN
       
       await cryptoDrawV2.connect(operator).createDraw(gameType);
       
@@ -268,13 +268,13 @@ describe("CryptoDrawV2 Contract", function () {
   });
 
   describe("Ticket Purchase - Native ETH", function () {
-    // Removido beforeEach que usava o contexto `this`.
+    // Removed beforeEach that used Mocha `this` context.
 
-    it("Should allow buying SuperSete ticket with ETH", async function () {
+  it("Should allow buying SuperSeven ticket with ETH", async function () {
       const { cryptoDrawV2, owner, operator, user1, ticketNFT, priceOracle } = await loadFixture(deployCryptoDrawV2Fixture);
       
       await cryptoDrawV2.connect(owner).setGameConfig(
-        0, // SUPERSETE
+  0, // SUPERSEVEN
         ethers.utils.parseEther("1"), // $1
         24 * 60 * 60, // 1 day
         true
@@ -283,7 +283,7 @@ describe("CryptoDrawV2 Contract", function () {
       await priceOracle.updatePrice(ethers.constants.AddressZero, ethers.utils.parseEther("2000"));
 
       const gameType = 0; // SUPERSETE
-      const numbers = [1, 2, 3, 4, 5, 6, 7]; // 7 numbers for SuperSete
+  const numbers = [1, 2, 3, 4, 5, 6, 7]; // 7 numbers for SuperSeven
       const rounds = 1;
       const requiredETH = ethers.utils.parseEther("0.0005"); // $1 worth of ETH
 
@@ -304,12 +304,12 @@ describe("CryptoDrawV2 Contract", function () {
       expect(event.args.player).to.equal(user1.address);
       expect(event.args.game).to.equal(gameType);
       
-      // Verify NFT was minted
+  // Verify NFT was minted
       const ticketId = event.args.ticketId;
       expect(await ticketNFT.ownerOf(ticketId)).to.equal(user1.address);
     });
 
-    it("Should reject invalid SuperSete numbers (wrong count)", async function () {
+  it("Should reject invalid SuperSeven numbers (wrong count)", async function () {
       const { cryptoDrawV2, owner, operator, user1, priceOracle } = await loadFixture(deployCryptoDrawV2Fixture);
       
   await cryptoDrawV2.connect(owner).setGameConfig(0, ethers.utils.parseEther("1"), 24 * 60 * 60, true);
@@ -361,7 +361,7 @@ describe("CryptoDrawV2 Contract", function () {
   });
 
   describe("Ticket Purchase - ERC20 Token", function () {
-    // Removido beforeEach que usava o contexto `this`.
+  // Removed beforeEach that used Mocha `this` context.
 
     it("Should allow buying EasyLotto ticket with ERC20 token", async function () {
       const { cryptoDrawV2, user1, ticketNFT, owner, priceOracle } = await loadFixture(deployCryptoDrawV2Fixture);

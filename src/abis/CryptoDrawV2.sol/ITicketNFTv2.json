@@ -1,0 +1,135 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ITicketNFTv2",
+  "sourceName": "contracts/CryptoDrawV2.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getTicket",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "player",
+          "type": "address"
+        },
+        {
+          "internalType": "enum ITicketNFTv2.GameType",
+          "name": "game",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint32",
+          "name": "numbersPacked",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "drawRound",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "roundsBought",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint8",
+          "name": "roundsRemaining",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "createdAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum ITicketNFTv2.TicketStatus",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "enum ITicketNFTv2.GameType",
+          "name": "game",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint32",
+          "name": "numbersPacked",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "drawRound",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "rounds",
+          "type": "uint8"
+        }
+      ],
+      "name": "mint",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum ITicketNFTv2.TicketStatus",
+          "name": "newStatus",
+          "type": "uint8"
+        }
+      ],
+      "name": "updateStatus",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
