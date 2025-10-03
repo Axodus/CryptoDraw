@@ -336,8 +336,7 @@ describe("PriceOracle - Coverage Tests", function () {
         it("should emit events on price updates", async function () {
             await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
 
-            // Ensure price update emits PriceUpdated (timestamp argument ignored)
-            await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
+            // Ensure price update emits PriceUpdated
             await expect(
                 priceOracle.connect(owner).updatePrice(mockToken.address, ethers.utils.parseEther("2"))
             ).to.emit(priceOracle, "PriceUpdated");
