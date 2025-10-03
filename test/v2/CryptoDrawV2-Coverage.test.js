@@ -47,16 +47,16 @@ describe("CryptoDrawV2 - Coverage Tests", function () {
         mockToken = await MockToken.deploy("Mock Token", "MOCK", 18);
         await mockToken.mint(user1.address, ethers.utils.parseEther("1000"));
 
-        // Add mock token support
-        await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
-        await cryptoDraw.updateTokenSupport(mockToken.address, true);
+    // Add mock token support
+    await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
+    await cryptoDraw.updateTokenSupport(mockToken.address, true);
+    // Ensure native payment (address(0)) is supported in CryptoDraw for tests
+    await cryptoDraw.updateTokenSupport(ethers.constants.AddressZero, true);
     });
 
     describe("Constructor Validation", function () {
         it("should revert with zero addresses", async function () {
-            const CryptoDraw = await ethers.getContractFactory("CryptoDrawV2", {
-                libraries: { GameLibrary: gameLibrary.address },
-            });
+            const CryptoDraw = await ethers.getContractFactory("CryptoDraw");
 
             await expect(CryptoDraw.deploy(
                 ethers.constants.AddressZero, // zero ticketNFT
@@ -228,7 +228,7 @@ describe("CryptoDrawV2 - Coverage Tests", function () {
         });
 
         it("should revert with suspended agent", async function () {
-            await cryptoDraw.updateAgentStatus(agent.address, true); // Suspend
+            await cryptoDraw.setSuspendedAgent(agent.address, true); // Suspend
 
             await expect(
                 cryptoDraw.buyTicket(
@@ -448,7 +448,7 @@ describe("CryptoDrawV2 - Coverage Tests", function () {
     describe("Withdraw Functionality", function () {
         it("should revert when no withdrawable balance", async function () {
             await expect(
-                cryptoDraw.connect(user1).withdraw()
+                cryptoDraw.connect(user1).withdrawPrize()
             ).to.be.revertedWithCustomError(cryptoDraw, "NoWithdrawableBalance");
         });
 

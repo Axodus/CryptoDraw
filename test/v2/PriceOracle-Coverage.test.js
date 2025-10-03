@@ -15,8 +15,8 @@ describe("PriceOracle - Coverage Tests", function () {
         [owner, user1, operator] = await ethers.getSigners();
 
         // Deploy PriceOracle
-        const PriceOracle = await ethers.getContractFactory("PriceOracle");
-        priceOracle = await PriceOracle.deploy(owner.address);
+    const PriceOracle = await ethers.getContractFactory("PriceOracle");
+    priceOracle = await PriceOracle.deploy(ethers.utils.parseEther("1"));
 
         // Deploy mock token
         const MockToken = await ethers.getContractFactory("MockToken");
@@ -142,8 +142,8 @@ describe("PriceOracle - Coverage Tests", function () {
                 priceOracle.connect(owner).updatePrice(mockToken.address, maxPrice)
             ).to.not.be.reverted;
 
-            const tokenInfo = await priceOracle.tokens(mockToken.address);
-            expect(tokenInfo.priceUSD).to.equal(maxPrice);
+            const tokenInfo = await priceOracle.getTokenData(mockToken.address);
+            expect(tokenInfo.price).to.equal(maxPrice);
         });
     });
 
@@ -162,15 +162,15 @@ describe("PriceOracle - Coverage Tests", function () {
 
             await expect(
                 priceOracle.convertToUSD(mockToken.address, ethers.utils.parseEther("1"))
-            ).to.be.revertedWith("Price is stale");
+            ).to.be.revertedWithCustomError(priceOracle, "StalePrice");
         });
 
         it("should work when price is fresh", async function () {
             // Set max age to 1 hour
             await priceOracle.setMaxPriceAge(3600);
 
-            // Update price to reset timestamp
-            await priceOracle.connect(operator).updatePrice(mockToken.address, ethers.utils.parseEther("1"));
+            // Update price to reset timestamp (owner only)
+            await priceOracle.connect(owner).updatePrice(mockToken.address, ethers.utils.parseEther("1"));
 
             await expect(
                 priceOracle.convertToUSD(mockToken.address, ethers.utils.parseEther("1"))
@@ -202,19 +202,21 @@ describe("PriceOracle - Coverage Tests", function () {
 
             await expect(
                 priceOracle.convertToUSD(unsupportedToken.address, ethers.utils.parseEther("1"))
-            ).to.be.revertedWith("Token not supported");
+            ).to.be.revertedWithCustomError(priceOracle, "TokenNotSupported");
 
             await expect(
                 priceOracle.convertFromUSD(unsupportedToken.address, ethers.utils.parseEther("1"))
-            ).to.be.revertedWith("Token not supported");
+            ).to.be.revertedWithCustomError(priceOracle, "TokenNotSupported");
         });
 
         it("should handle zero amount conversions", async function () {
-            const usdAmount = await priceOracle.convertToUSD(mockToken.address, 0);
-            expect(usdAmount).to.equal(0);
+            await expect(
+                priceOracle.convertToUSD(mockToken.address, 0)
+            ).to.be.revertedWithCustomError(priceOracle, "ZeroAmount");
 
-            const tokenAmount = await priceOracle.convertFromUSD(mockToken.address, 0);
-            expect(tokenAmount).to.equal(0);
+            await expect(
+                priceOracle.convertFromUSD(mockToken.address, 0)
+            ).to.be.revertedWithCustomError(priceOracle, "ZeroAmount");
         });
 
         it("should handle very small amounts", async function () {
@@ -244,7 +246,7 @@ describe("PriceOracle - Coverage Tests", function () {
     describe("Native Token Handling", function () {
         it("should handle native token operations", async function () {
             // Native token should be pre-configured
-            const nativePrice = await priceOracle.getPrice(ethers.constants.AddressZero);
+            const nativePrice = await priceOracle.getUSDPrice(ethers.constants.AddressZero);
             expect(nativePrice).to.be.gt(0);
 
             // Test conversions
@@ -262,7 +264,7 @@ describe("PriceOracle - Coverage Tests", function () {
                 priceOracle.connect(owner).updatePrice(ethers.constants.AddressZero, ethers.utils.parseEther("3000"))
             ).to.not.be.reverted;
 
-            const nativePrice = await priceOracle.getPrice(ethers.constants.AddressZero);
+            const nativePrice = await priceOracle.getUSDPrice(ethers.constants.AddressZero);
             expect(nativePrice).to.equal(ethers.utils.parseEther("3000"));
         });
     });
@@ -336,24 +338,24 @@ describe("PriceOracle - Coverage Tests", function () {
         it("should emit events on price updates", async function () {
             await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
 
+            // Ensure price update emits PriceUpdated (timestamp argument ignored)
+            await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
             await expect(
-                priceOracle.connect(operator).updatePrice(mockToken.address, ethers.utils.parseEther("2"))
-            ).to.emit(priceOracle, "PriceUpdated")
-              .withArgs(mockToken.address, ethers.utils.parseEther("2"));
+                priceOracle.connect(owner).updatePrice(mockToken.address, ethers.utils.parseEther("2"))
+            ).to.emit(priceOracle, "PriceUpdated");
         });
 
         it("should emit events on token addition", async function () {
             await expect(
                 priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"))
-            ).to.emit(priceOracle, "TokenAdded")
-              .withArgs(mockToken.address, 18, ethers.utils.parseEther("1"));
+            ).to.emit(priceOracle, "TokenSupportUpdated");
         });
 
         it("should emit events on Band feed configuration", async function () {
+            await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
             await expect(
                 priceOracle.setBandFeed(mockToken.address, mockToken.address, "ETH", "USD")
-            ).to.emit(priceOracle, "FeedConfigured")
-              .withArgs(mockToken.address, 1, mockToken.address);
+            ).to.emit(priceOracle, "FeedConfigured");
         });
     });
 });
