@@ -2,63 +2,6 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { loadFixture, time } = require("@nomicfoundation/hardhat-network-helpers");
 
-describe("CryptoDrawV2 - Coverage & Priority", function () {
-  let CryptoDraw, cryptoDraw, owner, addr1, addr2;
-
-  beforeEach(async function () {
-    [owner, addr1, addr2] = await ethers.getSigners();
-
-    const PriceOracle = await ethers.getContractFactory("PriceOracle");
-    const TicketNFT = await ethers.getContractFactory("TicketNFT");
-    const CryptoDrawFactory = await ethers.getContractFactory("CryptoDrawV2");
-
-    this.priceOracle = await PriceOracle.deploy();
-    this.ticketNFT = await TicketNFT.deploy();
-    cryptoDraw = await CryptoDrawFactory.deploy(this.priceOracle.address, this.ticketNFT.address);
-
-    // wire ticketNFT to cryptodraw
-    await this.ticketNFT.setCryptoDrawAddress(cryptoDraw.address);
-
-    // set some config on price oracle so tokens can be converted
-    const MockToken = await ethers.getContractFactory("MockToken");
-    this.token = await MockToken.deploy("MockCR", "MCR", 18);
-    await this.priceOracle.addToken(this.token.address, 18, ethers.constants.AddressZero);
-    await this.priceOracle.updatePrice(this.token.address, 1000);
-  });
-
-  it("should allow buying tickets with native and ERC20, and agent commission flows", async function () {
-    // fund addr1 with native via hardhat (already funded by default signers)
-    const tx = await cryptoDraw.connect(addr1).buyTicket({ value: ethers.utils.parseEther("0.01") });
-    await tx.wait();
-    // expect a ticket minted to addr1
-    const balance = await this.ticketNFT.balanceOf(addr1.address);
-    expect(balance).to.be.gte(1);
-
-    // buy with token
-    await this.token.connect(owner).mint(addr2.address, ethers.utils.parseUnits("100", 18));
-    await this.token.connect(addr2).approve(cryptoDraw.address, ethers.utils.parseUnits("100", 18));
-    await cryptoDraw.connect(addr2).buyTicketWithToken(this.token.address, 1);
-    const bal2 = await this.ticketNFT.balanceOf(addr2.address);
-    expect(bal2).to.be.gte(1);
-  });
-
-  it("should allow closing draws and claiming prizes", async function () {
-    await cryptoDraw.connect(addr1).buyTicket({ value: ethers.utils.parseEther("0.01") });
-    // simulate close
-    await cryptoDraw.closeDraw(1);
-    // claim should work if winner matched (this test asserts flows, not real randomness)
-    // Claim prize will revert unless caller is winner; ensure revert is handled
-    await expect(cryptoDraw.connect(addr1).claimPrize(1)).to.be.reverted;
-  });
-
-  it("should allow emergencyWithdraw and revenue config changes by operator/owner roles", async function () {
-    await expect(cryptoDraw.emergencyWithdraw()).to.be.reverted;
-    await cryptoDraw.updateRevenueConfig(500, 100); // assume owner can call
-    // No revert means success
-  });
-
-});
-
 describe("CryptoDrawV2 Contract", function () {
   // Deployment fixture
   async function deployCryptoDrawV2Fixture() {

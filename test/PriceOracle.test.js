@@ -7,7 +7,8 @@ describe("PriceOracle - Coverage", function () {
   beforeEach(async function () {
     [owner, addr1] = await ethers.getSigners();
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
-    priceOracle = await PriceOracle.deploy();
+    const initialOnePrice = ethers.utils.parseEther("2000"); // ONE = $2000
+    priceOracle = await PriceOracle.deploy(initialOnePrice);
     await priceOracle.deployed();
   });
 
@@ -15,25 +16,25 @@ describe("PriceOracle - Coverage", function () {
     const MockToken = await ethers.getContractFactory("MockToken");
     const token = await MockToken.deploy("Mock", "MCK", 18);
 
-    await priceOracle.addToken(token.address, 18, ethers.constants.AddressZero);
-    await priceOracle.updatePrice(token.address, 2000); // 2000 USD with implied decimals
+  await priceOracle.addToken(token.address, 18, ethers.utils.parseEther("1")); // $1
+  await priceOracle.updatePrice(token.address, ethers.utils.parseEther("2")); // $2
 
-    const cents = await priceOracle.convertToUSD(token.address, ethers.utils.parseUnits("1", 18));
-    expect(cents).to.be.gt(0);
+  const usd = await priceOracle.convertToUSD(token.address, ethers.utils.parseUnits("1", 18));
+  expect(usd).to.equal(ethers.utils.parseEther("2")); // 1 token * $2
 
-    const tokens = await priceOracle.convertFromUSD(token.address, 100); // 100 USD
-    expect(tokens).to.be.gt(0);
+  const tokens = await priceOracle.convertFromUSD(token.address, ethers.utils.parseEther("1")); // $1
+  expect(tokens).to.equal(ethers.utils.parseUnits("0.5", 18)); // $1 / $2 = 0.5
 
-    await priceOracle.removeToken(token.address);
-    await expect(priceOracle.convertToUSD(token.address, 1)).to.be.reverted;
+  await priceOracle.removeToken(token.address);
+  await expect(priceOracle.convertToUSD(token.address, 1)).to.be.reverted;
   });
 
   it("should handle price staleness and max age", async function () {
     const MockToken = await ethers.getContractFactory("MockToken");
     const token = await MockToken.deploy("Mock2", "MCK2", 8);
 
-    await priceOracle.addToken(token.address, 8, ethers.constants.AddressZero);
-    await priceOracle.updatePrice(token.address, 1000);
+  await priceOracle.addToken(token.address, 8, ethers.utils.parseEther("1"));
+  await priceOracle.updatePrice(token.address, ethers.utils.parseEther("1"));
     await priceOracle.setMaxPriceAge(1); // 1 second to force staleness quickly
 
     // wait 2 seconds
@@ -46,10 +47,19 @@ describe("PriceOracle - Coverage", function () {
     const MockToken = await ethers.getContractFactory("MockToken");
     const token = await MockToken.deploy("Mock3", "MCK3", 6);
 
-    await priceOracle.addToken(token.address, 6, ethers.constants.AddressZero);
-    await priceOracle.setBandFeed(token.address, ethers.constants.AddressZero);
-    expect(await priceOracle.hasBandFeed(token.address)).to.be.true;
-    await priceOracle.clearBandFeed(token.address);
-    expect(await priceOracle.hasBandFeed(token.address)).to.be.false;
+    await priceOracle.addToken(token.address, 6, ethers.utils.parseEther("1"));
+    // setBandFeed requires non-zero adapter and non-empty base/quote
+    await priceOracle.setBandFeed(token.address, owner.address, "ONE", "USD");
+    const feed1 = await priceOracle.feedConfig(token.address);
+    // PriceSource enum: 0 = MANUAL, 1 = BAND
+    expect(feed1.source).to.equal(1);
+    expect(feed1.adapter).to.equal(owner.address);
+    expect(feed1.base).to.equal("ONE");
+    expect(feed1.quote).to.equal("USD");
+
+    await priceOracle.clearFeed(token.address);
+    const feed2 = await priceOracle.feedConfig(token.address);
+    expect(feed2.source).to.equal(0); // MANUAL
+    expect(feed2.adapter).to.equal(ethers.constants.AddressZero);
   });
 });

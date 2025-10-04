@@ -13,7 +13,17 @@ describe("TicketNFT - Coverage", function () {
   });
 
   it("should mint and provide tokenURI and enforce soulbound restrictions", async function () {
-    await ticketNFT.mint(addr1.address, 1, 100, 1); // rounds, price, gameType are example args in this repo
+    // Configure a fake CryptoDraw caller (helper) as the onlyCryptoDraw address
+    const TestTicketNFCCaller = await ethers.getContractFactory("TestTicketNFCCaller");
+    const helper = await TestTicketNFCCaller.deploy(ticketNFT.address);
+    await ticketNFT.setCryptoDrawAddress(helper.address);
+
+    // We need a contract at helper that can call mint; since helper doesn't mint, simulate by using owner temporarily
+    // NOTE: TicketNFT.mint is onlyCryptoDraw; to mint for the test, we'll temporarily set cryptoDrawAddress to owner, mint, then set back to helper
+    await ticketNFT.setCryptoDrawAddress(owner.address);
+    await ticketNFT.mint(addr1.address, 1, 100, 1, 1); // (to, game, numbersPacked, drawRound, rounds)
+    await ticketNFT.setCryptoDrawAddress(helper.address);
+
     const balance = await ticketNFT.balanceOf(addr1.address);
     expect(balance).to.equal(1);
 
@@ -34,8 +44,10 @@ describe("TicketNFT - Coverage", function () {
     // owner sets helper as cryptoDraw address
     await ticketNFT.setCryptoDrawAddress(helper.address);
 
-    // mint a token directly via owner
-    await ticketNFT.mint(owner.address, 1, 100, 1);
+  // mint a token via onlyCryptoDraw: temporarily set to owner to mint
+  await ticketNFT.setCryptoDrawAddress(owner.address);
+  await ticketNFT.mint(owner.address, 1, 100, 1, 1);
+  await ticketNFT.setCryptoDrawAddress(helper.address);
     const tokenId = (await ticketNFT.tokenOfOwnerByIndex(owner.address, 0)).toString();
 
     // helper can call decrementRounds (onlyCryptoDraw)
@@ -47,7 +59,8 @@ describe("TicketNFT - Coverage", function () {
   });
 
   it("should expose status changes and round decrements properly", async function () {
-    await ticketNFT.mint(owner.address, 3, 100, 1);
+  await ticketNFT.setCryptoDrawAddress(owner.address);
+  await ticketNFT.mint(owner.address, 1, 100, 1, 3);
     const tokenId = (await ticketNFT.tokenOfOwnerByIndex(owner.address, 0)).toString();
     expect(await ticketNFT.getTicketRounds(tokenId)).to.equal(3);
 

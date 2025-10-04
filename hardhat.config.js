@@ -41,7 +41,7 @@ module.exports = {
     }
   },
   coverage: {
-    skipFiles: ["contracts/mocks/", "test/v2/"],
+    skipFiles: ["mocks/", "v2/"],
   },
   networks: {
     hardhat: {
