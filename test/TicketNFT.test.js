@@ -21,14 +21,16 @@ describe("TicketNFT - Coverage", function () {
     // We need a contract at helper that can call mint; since helper doesn't mint, simulate by using owner temporarily
     // NOTE: TicketNFT.mint is onlyCryptoDraw; to mint for the test, we'll temporarily set cryptoDrawAddress to owner, mint, then set back to helper
     await ticketNFT.setCryptoDrawAddress(owner.address);
-    await ticketNFT.mint(addr1.address, 1, 100, 1, 1); // (to, game, numbersPacked, drawRound, rounds)
+  // capture next tokenId via callStatic
+  const nextId = await ticketNFT.callStatic.mint(addr1.address, 1, 100, 1, 1);
+  await ticketNFT.mint(addr1.address, 1, 100, 1, 1);
     await ticketNFT.setCryptoDrawAddress(helper.address);
 
-    const balance = await ticketNFT.balanceOf(addr1.address);
+  const balance = await ticketNFT.balanceOf(addr1.address);
     expect(balance).to.equal(1);
 
-    const tokenId = (await ticketNFT.tokenOfOwnerByIndex(addr1.address, 0)).toString();
-    expect(await ticketNFT.tokenURI(tokenId)).to.be.a("string");
+  const tokenId = nextId.toString();
+  expect(await ticketNFT.tokenURI(tokenId)).to.be.a("string");
 
     // soulbound: transfers should revert
     await expect(
@@ -46,9 +48,10 @@ describe("TicketNFT - Coverage", function () {
 
   // mint a token via onlyCryptoDraw: temporarily set to owner to mint
   await ticketNFT.setCryptoDrawAddress(owner.address);
+  const tid = await ticketNFT.callStatic.mint(owner.address, 1, 100, 1, 1);
   await ticketNFT.mint(owner.address, 1, 100, 1, 1);
   await ticketNFT.setCryptoDrawAddress(helper.address);
-    const tokenId = (await ticketNFT.tokenOfOwnerByIndex(owner.address, 0)).toString();
+  const tokenId = tid.toString();
 
     // helper can call decrementRounds (onlyCryptoDraw)
     await helper.callDecrement(tokenId);
@@ -60,18 +63,22 @@ describe("TicketNFT - Coverage", function () {
 
   it("should expose status changes and round decrements properly", async function () {
   await ticketNFT.setCryptoDrawAddress(owner.address);
+  const tid2 = await ticketNFT.callStatic.mint(owner.address, 1, 100, 1, 3);
   await ticketNFT.mint(owner.address, 1, 100, 1, 3);
-    const tokenId = (await ticketNFT.tokenOfOwnerByIndex(owner.address, 0)).toString();
-    expect(await ticketNFT.getTicketRounds(tokenId)).to.equal(3);
+  const tokenId = tid2.toString();
+  const ticketBefore = await ticketNFT.getTicket(tokenId);
+  expect(ticketBefore.roundsRemaining).to.equal(3);
 
     const TestTicketNFCCaller = await ethers.getContractFactory("TestTicketNFCCaller");
     const helper = await TestTicketNFCCaller.deploy(ticketNFT.address);
     await ticketNFT.setCryptoDrawAddress(helper.address);
 
     await helper.callDecrement(tokenId);
-    expect(await ticketNFT.getTicketRounds(tokenId)).to.equal(2);
-    await helper.callUpdate(tokenId, 99);
-    expect(await ticketNFT.getTicketStatus(tokenId)).to.equal(99);
+  const ticketMid = await ticketNFT.getTicket(tokenId);
+  expect(ticketMid.roundsRemaining).to.equal(2);
+  await helper.callUpdate(tokenId, 2); // TicketStatus.REDEEMED
+  const status = await ticketNFT.getTicketStatus(tokenId);
+  expect(status).to.equal(2);
   });
 });
 

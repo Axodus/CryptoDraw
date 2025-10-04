@@ -648,4 +648,339 @@ describe("CryptoDrawV2 Contract", function () {
       ).to.be.reverted;
     });
   });
+
+  // Merged tests from test/v2/CryptoDrawV2-priority.test.js
+  describe("Merged v2 - Priority flows", function () {
+    async function deployMergedFixture() {
+      const [owner, operator, agent, user1, user2, treasury, prize, project, grant, operation] = await ethers.getSigners();
+
+      const TicketNFT = await ethers.getContractFactory('TicketNFT');
+      const ticketNFT = await TicketNFT.deploy();
+
+      const PriceOracle = await ethers.getContractFactory('PriceOracle');
+      const priceOracle = await PriceOracle.deploy(ethers.utils.parseEther('1'));
+
+      const CryptoDraw = await ethers.getContractFactory('contracts/CryptoDrawV2.sol:CryptoDraw');
+      const cryptoDraw = await CryptoDraw.deploy(
+        ticketNFT.address,
+        priceOracle.address,
+        treasury.address,
+        prize.address,
+        project.address,
+        grant.address,
+        operation.address
+      );
+
+      await ticketNFT.setCryptoDrawAddress(cryptoDraw.address);
+
+      const OPERATOR_ROLE = await cryptoDraw.OPERATOR_ROLE();
+      const AGENT_ROLE = await cryptoDraw.AGENT_ROLE();
+      await cryptoDraw.grantRole(OPERATOR_ROLE, operator.address);
+      await cryptoDraw.grantRole(AGENT_ROLE, agent.address);
+
+      const MockToken = await ethers.getContractFactory('MockToken');
+      const mockToken = await MockToken.deploy('Mock Token', 'MOCK', 18);
+      await mockToken.mint(user1.address, ethers.utils.parseEther('1000'));
+
+      await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther('1'));
+      await cryptoDraw.setSupportedToken(mockToken.address, true);
+      await cryptoDraw.setSupportedToken(ethers.constants.AddressZero, true);
+
+      return { owner, operator, agent, user1, user2, treasury, prize, project, grant, operation, ticketNFT, priceOracle, cryptoDraw, mockToken };
+    }
+
+    it('operator can createDraw and emits DrawCreated', async function () {
+      const { operator, cryptoDraw } = await deployMergedFixture();
+      const tx = await cryptoDraw.connect(operator).createDraw(0);
+      const rcpt = await tx.wait();
+      const ev = rcpt.events.find((e) => e.event === 'DrawCreated');
+      expect(ev).to.not.be.undefined;
+      const current = await cryptoDraw.getCurrentDrawId(0);
+      expect(current).to.be.gt(0);
+    });
+
+    it('buyTicketWithToken wrapper works using ERC20', async function () {
+      const { user1, cryptoDraw, mockToken } = await deployMergedFixture();
+      await mockToken.connect(user1).approve(cryptoDraw.address, ethers.utils.parseEther('1'));
+      const tx = await cryptoDraw.connect(user1).buyTicketWithToken(
+        0,
+        [1,2,3,4,5,6,7],
+        1,
+        mockToken.address,
+        ethers.utils.parseEther('1'),
+        ethers.constants.AddressZero
+      );
+      const rcpt = await tx.wait();
+      const ev = rcpt.events.find((e) => e.event === 'TicketPurchased');
+      expect(ev).to.not.be.undefined;
+    });
+
+    it('emergencyWithdraw reverts when to == zero address', async function () {
+      const { owner, cryptoDraw, mockToken } = await deployMergedFixture();
+      await expect(
+        cryptoDraw.connect(owner).emergencyWithdraw(mockToken.address, ethers.constants.AddressZero, ethers.utils.parseEther('1'))
+      ).to.be.revertedWithCustomError(cryptoDraw, 'ZeroAddress');
+    });
+
+    it('emergencyWithdraw transfers native ONE when called by admin', async function () {
+      const { owner, cryptoDraw, user1 } = await deployMergedFixture();
+      await owner.sendTransaction({ to: cryptoDraw.address, value: ethers.utils.parseEther('1') });
+      const before = await ethers.provider.getBalance(user1.address);
+      const tx = await cryptoDraw.connect(owner).emergencyWithdraw(ethers.constants.AddressZero, user1.address, ethers.utils.parseEther('1'));
+      await tx.wait();
+      const after = await ethers.provider.getBalance(user1.address);
+      expect(after).to.be.gt(before);
+    });
+
+    it('setWallets updates only non-zero addresses', async function () {
+      const { owner, cryptoDraw, user1 } = await deployMergedFixture();
+      await cryptoDraw.connect(owner).setWallets(user1.address, ethers.constants.AddressZero, ethers.constants.AddressZero, ethers.constants.AddressZero, ethers.constants.AddressZero);
+      const newTreasury = await cryptoDraw.treasuryWallet();
+      expect(newTreasury).to.equal(user1.address);
+    });
+
+    it('claimPrize reverts when caller is not ticket owner', async function () {
+      const { user1, user2, cryptoDraw, mockToken } = await deployMergedFixture();
+      await mockToken.connect(user1).approve(cryptoDraw.address, ethers.utils.parseEther('1'));
+      const tx = await cryptoDraw.connect(user1).buyTicketWithToken(
+        0,
+        [1,2,3,4,5,6,7],
+        1,
+        mockToken.address,
+        ethers.utils.parseEther('1'),
+        ethers.constants.AddressZero
+      );
+      const rcpt = await tx.wait();
+      const ev = rcpt.events.find((e) => e.event === 'TicketPurchased');
+      const ticketId = ev.args.ticketId;
+      await expect(
+        cryptoDraw.connect(user2).claimPrize(ticketId)
+      ).to.be.revertedWithCustomError(cryptoDraw, 'NotTicketOwner');
+    });
+
+    it('buyTicket native: underpay, exact and overpay refund', async function () {
+      const { user1, cryptoDraw } = await deployMergedFixture();
+      await expect(
+        cryptoDraw.connect(user1).buyTicket(
+          0,
+          [1,2,3,4,5,6,7],
+          1,
+          ethers.constants.AddressZero,
+          ethers.utils.parseEther('1'),
+          ethers.constants.AddressZero,
+          { value: ethers.utils.parseEther('0.5') }
+        )
+      ).to.be.revertedWith('Insufficient native payment');
+
+      await expect(
+        cryptoDraw.connect(user1).buyTicket(
+          0,
+          [1,2,3,4,5,6,7],
+          1,
+          ethers.constants.AddressZero,
+          ethers.utils.parseEther('1'),
+          ethers.constants.AddressZero,
+          { value: ethers.utils.parseEther('1') }
+        )
+      ).to.not.be.reverted;
+
+      const before = await user1.getBalance();
+      const tx = await cryptoDraw.connect(user1).buyTicket(
+        0,
+        [1,2,3,4,5,6,7],
+        1,
+        ethers.constants.AddressZero,
+        ethers.utils.parseEther('2'),
+        ethers.constants.AddressZero,
+        { value: ethers.utils.parseEther('2') }
+      );
+      const rcpt = await tx.wait();
+      const gas = rcpt.gasUsed.mul(rcpt.effectiveGasPrice);
+      const after = await user1.getBalance();
+      expect(after).to.be.closeTo(before.sub(ethers.utils.parseEther('1')).sub(gas), ethers.utils.parseEther('0.01'));
+    });
+
+    it('buyTicket with agent and withdrawAgentCommission flow', async function () {
+      const { agent, user1, cryptoDraw } = await deployMergedFixture();
+      await cryptoDraw.connect(user1).buyTicket(
+        0,
+        [1,2,3,4,5,6,7],
+        1,
+        ethers.constants.AddressZero,
+        ethers.utils.parseEther('1'),
+        agent.address,
+        { value: ethers.utils.parseEther('1') }
+      );
+
+      const commission = await cryptoDraw.agentCommissions(agent.address);
+      expect(commission).to.be.gt(0);
+      await user1.sendTransaction({ to: cryptoDraw.address, value: commission });
+
+      const before = await ethers.provider.getBalance(agent.address);
+      const tx = await cryptoDraw.connect(agent).withdrawAgentCommission();
+      await tx.wait();
+      const after = await ethers.provider.getBalance(agent.address);
+      expect(after).to.be.gt(before);
+      expect(await cryptoDraw.agentCommissions(agent.address)).to.equal(0);
+    });
+
+    it('closeDrawSimple emits DrawClosed and closeDraw emits DrawCompleted + RevenueDistributed', async function () {
+      const { operator, user1, cryptoDraw } = await deployMergedFixture();
+      await cryptoDraw.connect(operator).createDraw(0);
+      const drawId = await cryptoDraw.getCurrentDrawId(0);
+      await cryptoDraw.connect(user1).buyTicket(0, [1,2,3,4,5,6,7], 1, ethers.constants.AddressZero, ethers.utils.parseEther('1'), ethers.constants.AddressZero, { value: ethers.utils.parseEther('1') });
+
+      const tx = await cryptoDraw.connect(operator).closeDrawSimple(0, drawId);
+      const rcpt = await tx.wait();
+      expect(rcpt.events.find((e) => e.event === 'DrawClosed')).to.not.be.undefined;
+
+      await cryptoDraw.connect(operator).createDraw(0);
+      const drawId2 = await cryptoDraw.getCurrentDrawId(0);
+      await cryptoDraw.connect(user1).buyTicket(0, [1,2,3,4,5,6,7], 1, ethers.constants.AddressZero, ethers.utils.parseEther('1'), ethers.constants.AddressZero, { value: ethers.utils.parseEther('1') });
+
+      const tx2 = await cryptoDraw.connect(operator)['closeDraw(uint8,uint32,uint256)'](0, drawId2, 1);
+      const rcpt2 = await tx2.wait();
+      expect(rcpt2.events.find((e) => e.event === 'DrawCompleted')).to.not.be.undefined;
+      expect(rcpt2.events.find((e) => e.event === 'RevenueDistributed')).to.not.be.undefined;
+    });
+
+    it('pause blocks buyTicket and unpause restores', async function () {
+      const { owner, user1, cryptoDraw } = await deployMergedFixture();
+      await cryptoDraw.connect(owner).pause();
+      await expect(
+        cryptoDraw.connect(user1).buyTicket(0, [1,2,3,4,5,6,7], 1, ethers.constants.AddressZero, ethers.utils.parseEther('1'), ethers.constants.AddressZero, { value: ethers.utils.parseEther('1') })
+      ).to.be.revertedWith('Pausable: paused');
+      await cryptoDraw.connect(owner).unpause();
+      await expect(
+        cryptoDraw.connect(user1).buyTicket(0, [1,2,3,4,5,6,7], 1, ethers.constants.AddressZero, ethers.utils.parseEther('1'), ethers.constants.AddressZero, { value: ethers.utils.parseEther('1') })
+      ).to.not.be.reverted;
+    });
+  });
+
+  // Merged tests from test/v2/CryptoDrawV2.basic.test.js
+  describe('Merged v2 - Basic flows', function () {
+    async function deployBasicFixture() {
+      const [owner, operator, agent, user] = await ethers.getSigners();
+
+      const TicketNFT = await ethers.getContractFactory('TicketNFT');
+      const ticketNFT = await TicketNFT.deploy();
+
+      const initialOnePrice = ethers.utils.parseEther('2000');
+      const PriceOracle = await ethers.getContractFactory('PriceOracle');
+      const priceOracle = await PriceOracle.deploy(initialOnePrice);
+
+      const treasuryWallet = owner.address;
+      const prizeWallet = owner.address;
+      const projectFund = owner.address;
+      const grantFund = owner.address;
+      const operationFund = owner.address;
+
+      const CryptoDraw = await ethers.getContractFactory('contracts/CryptoDrawV2.sol:CryptoDraw');
+      const cryptoDraw = await CryptoDraw.deploy(
+        ticketNFT.address,
+        priceOracle.address,
+        treasuryWallet,
+        prizeWallet,
+        projectFund,
+        grantFund,
+        operationFund
+      );
+
+      await ticketNFT.setCryptoDrawAddress(cryptoDraw.address);
+
+      const ADMIN_ROLE = await cryptoDraw.ADMIN_ROLE();
+      const OPERATOR_ROLE = await cryptoDraw.OPERATOR_ROLE();
+      const AGENT_ROLE = await cryptoDraw.AGENT_ROLE();
+      await cryptoDraw.grantRole(OPERATOR_ROLE, operator.address);
+      await cryptoDraw.grantRole(AGENT_ROLE, agent.address);
+
+      await cryptoDraw.setSupportedToken(ethers.constants.AddressZero, true);
+
+      return { owner, operator, agent, user, ticketNFT, priceOracle, cryptoDraw, ADMIN_ROLE, OPERATOR_ROLE, AGENT_ROLE };
+    }
+
+    it('configures game and buys a ticket with ONE (native)', async function () {
+      const { cryptoDraw, user, ticketNFT } = await deployBasicFixture();
+
+      const ticketPriceUSD = ethers.utils.parseEther('1');
+      const drawInterval = 24 * 60 * 60;
+      await cryptoDraw.setGameConfig(0, ticketPriceUSD, drawInterval, true);
+
+      const requiredOne = ethers.utils.parseEther('0.0005');
+      const tx = await cryptoDraw.connect(user).buyTicket(
+        0,
+        [1, 2, 3, 4, 5, 6, 7],
+        1,
+        ethers.constants.AddressZero,
+        requiredOne,
+        ethers.constants.AddressZero,
+        { value: requiredOne }
+      );
+      const receipt = await tx.wait();
+      const ev = receipt.events.find((e) => e.event === 'TicketPurchased');
+      expect(ev).to.not.be.undefined;
+      const ticketId = ev.args.ticketId;
+      expect(await ticketNFT.ownerOf(ticketId)).to.equal(user.address);
+
+      const currentDrawId = await cryptoDraw.getCurrentDrawId(0);
+      expect(currentDrawId).to.be.gt(0);
+
+      const draw = await cryptoDraw.getDraw(0, currentDrawId);
+      expect(draw.status).to.equal(1);
+    });
+
+    it('accrues and withdraws agent commission', async function () {
+      const { cryptoDraw, agent, user } = await deployBasicFixture();
+
+      await cryptoDraw.setGameConfig(1, ethers.utils.parseEther('2'), 7 * 24 * 60 * 60, true);
+
+      const requiredOne = ethers.utils.parseEther('0.001');
+      await cryptoDraw.connect(user).buyTicket(
+        1,
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        1,
+        ethers.constants.AddressZero,
+        requiredOne,
+        agent.address,
+        { value: requiredOne }
+      );
+
+      const commission = await cryptoDraw.agentCommissions(agent.address);
+      expect(commission).to.be.gt(0);
+
+      await user.sendTransaction({ to: cryptoDraw.address, value: commission });
+
+      const before = await ethers.provider.getBalance(agent.address);
+      const tx = await cryptoDraw.connect(agent).withdrawAgentCommission();
+      await tx.wait();
+      const after = await ethers.provider.getBalance(agent.address);
+
+      expect(after).to.be.gt(before);
+      expect(await cryptoDraw.agentCommissions(agent.address)).to.equal(0);
+    });
+
+    it('closes a draw and finalizes status', async function () {
+      const { cryptoDraw, user } = await deployBasicFixture();
+
+      await cryptoDraw.setGameConfig(0, ethers.utils.parseEther('1'), 24 * 60 * 60, true);
+
+      const requiredOne = ethers.utils.parseEther('0.0005');
+      await cryptoDraw.connect(user).buyTicket(
+        0,
+        [1, 2, 3, 4, 5, 6, 7],
+        1,
+        ethers.constants.AddressZero,
+        requiredOne,
+        ethers.constants.AddressZero,
+        { value: requiredOne }
+      );
+
+      const drawId = await cryptoDraw.getCurrentDrawId(0);
+
+      await cryptoDraw['closeDraw(uint8,uint32,uint256)'](0, drawId, 123456);
+      const closed = await cryptoDraw.getDraw(0, drawId);
+      expect(closed.status).to.equal(4);
+      expect(closed.winningNumbersPacked).to.not.equal(0);
+    });
+  });
 });

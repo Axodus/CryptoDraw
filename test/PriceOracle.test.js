@@ -37,10 +37,12 @@ describe("PriceOracle - Coverage", function () {
   await priceOracle.updatePrice(token.address, ethers.utils.parseEther("1"));
     await priceOracle.setMaxPriceAge(1); // 1 second to force staleness quickly
 
-    // wait 2 seconds
-    await new Promise((res) => setTimeout(res, 2000));
-
-    await expect(priceOracle.getUSDPrice(token.address)).to.be.reverted;
+    // increase time in EVM
+  const { time } = require("@nomicfoundation/hardhat-network-helpers");
+  await time.increase(120);
+  // força mineração de um novo bloco
+  await ethers.provider.send("evm_mine", []);
+  await expect(priceOracle.getUSDPrice(token.address)).to.be.revertedWithCustomError(priceOracle, "StalePrice");
   }).timeout(10000);
 
   it("should support setting band feeds and clearing them", async function () {
@@ -52,14 +54,14 @@ describe("PriceOracle - Coverage", function () {
     await priceOracle.setBandFeed(token.address, owner.address, "ONE", "USD");
     const feed1 = await priceOracle.feedConfig(token.address);
     // PriceSource enum: 0 = MANUAL, 1 = BAND
-    expect(feed1.source).to.equal(1);
+    expect(feed1.source.toNumber()).to.equal(1);
     expect(feed1.adapter).to.equal(owner.address);
     expect(feed1.base).to.equal("ONE");
     expect(feed1.quote).to.equal("USD");
 
     await priceOracle.clearFeed(token.address);
     const feed2 = await priceOracle.feedConfig(token.address);
-    expect(feed2.source).to.equal(0); // MANUAL
+    expect(feed2.source.toNumber()).to.equal(0); // MANUAL
     expect(feed2.adapter).to.equal(ethers.constants.AddressZero);
   });
 });
