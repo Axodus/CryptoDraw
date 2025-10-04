@@ -298,6 +298,26 @@ describe("TicketNFT - Extended Coverage (merged)", function () {
     await expect(ticketNFT.tokenURI(id2)).to.be.reverted;
   });
 
+  it("isTicketActive returns true only when ACTIVE and roundsRemaining > 0", async function () {
+    await ticketNFT.setCryptoDrawAddress(minter.address);
+    const r = await (await ticketNFT.connect(minter).mint(user1.address, 0, 111, 1, 2)).wait();
+    const id = r.events.find(e => e.event === 'TicketMinted').args.tokenId;
+    // Initially ACTIVE with roundsRemaining=2 => true
+    expect(await ticketNFT.isTicketActive(id)).to.equal(true);
+    // Decrement rounds to 1 -> still true
+    const Helper = await ethers.getContractFactory('TestTicketNFCCaller');
+    const helper = await Helper.deploy(ticketNFT.address);
+    await ticketNFT.setCryptoDrawAddress(helper.address);
+    await helper.callDecrement(id);
+    expect(await ticketNFT.isTicketActive(id)).to.equal(true);
+    // Decrement to 0 triggers EXPIRED and active=false
+    await helper.callDecrement(id);
+    expect(await ticketNFT.isTicketActive(id)).to.equal(false);
+    // If status changed to REDEEMED, still false
+    await helper.callUpdate(id, 2);
+    expect(await ticketNFT.isTicketActive(id)).to.equal(false);
+  });
+
   it("transferFrom reverts with custom error TransferNotAllowed", async function () {
     const r = await (await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1)).wait();
     const id = r.events.find(e => e.event === 'TicketMinted').args.tokenId;

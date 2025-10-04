@@ -1282,5 +1282,17 @@ describe("CryptoDrawV2 Contract", function () {
       const after = await ethers.provider.getBalance(cryptoDraw.address);
       expect(after.sub(before)).to.equal(ethers.utils.parseEther('0.001'));
     });
+
+    it('setWallets updates all non-zero wallets (treasury, prize, project, grant, operation)', async function () {
+      const { cryptoDraw, owner, user1, user2, user3, user4 } = await baseFixture();
+      // use distinct addresses for each wallet
+      const [treasury, prize, project, grant, operation] = [user1.address, user2.address, user3.address, user4.address, owner.address];
+      await cryptoDraw.connect(owner).setWallets(treasury, prize, project, grant, operation);
+      expect(await cryptoDraw.treasuryWallet()).to.equal(treasury);
+      expect(await cryptoDraw.prizeWallet()).to.equal(prize);
+      expect(await cryptoDraw.projectFund()).to.equal(project);
+      expect(await cryptoDraw.grantFund()).to.equal(grant);
+      expect(await cryptoDraw.operationFund()).to.equal(operation);
+    });
   });
 });

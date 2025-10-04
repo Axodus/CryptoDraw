@@ -295,6 +295,24 @@ describe("PriceOracle - Extended Coverage (merged)", function () {
     expect(nativeCfg.adapter).to.equal(mockToken.address);
   });
 
+  it("isPriceValid uses Band feed timestamps (true then false after staleness)", async function () {
+    // Add token and set Band feed to BandMock that returns current timestamp
+    await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
+    const BandMock = await ethers.getContractFactory("BandMock");
+    const band = await BandMock.deploy();
+    await priceOracle.setBandFeed(mockToken.address, band.address, "MOCK", "USD");
+
+    // Initially valid
+    expect(await priceOracle.isPriceValid(mockToken.address)).to.equal(true);
+
+    // Reduce max age to 1 and advance time to force invalid
+    await priceOracle.setMaxPriceAge(1);
+    const { time } = require("@nomicfoundation/hardhat-network-helpers");
+    await time.increase(3);
+    await ethers.provider.send("evm_mine", []);
+    expect(await priceOracle.isPriceValid(mockToken.address)).to.equal(false);
+  });
+
   it("emits events on updates and configuration", async function () {
     await expect(priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"))).to.emit(priceOracle, "TokenSupportUpdated");
     await priceOracle.updatePrice(mockToken.address, ethers.utils.parseEther("2"));
