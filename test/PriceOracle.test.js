@@ -159,6 +159,56 @@ describe("PriceOracle - Extended Coverage (merged)", function () {
     expect(info.price).to.equal(maxPrice);
   });
 
+  it("batch updatePrices: length mismatch, unsupported token, invalid price, success", async function () {
+    // length mismatch
+    const t1 = await (await (await ethers.getContractFactory("MockERC20")).deploy("T1","T1",18)).deployed();
+    await expect(priceOracle.updatePrices([t1.address], [ethers.utils.parseEther("1"), ethers.utils.parseEther("2")]))
+      .to.be.revertedWith("Arrays length mismatch");
+
+    // unsupported token in batch
+    await expect(priceOracle.updatePrices([t1.address], [ethers.utils.parseEther("1")]))
+      .to.be.revertedWithCustomError(priceOracle, "TokenNotSupported");
+
+    // add support and then invalid price in batch
+    await priceOracle.addToken(t1.address, 18, ethers.utils.parseEther("1"));
+    await expect(priceOracle.updatePrices([t1.address], [ethers.constants.Zero]))
+      .to.be.revertedWithCustomError(priceOracle, "InvalidPrice");
+
+    // success: update native ONE and t1 in one shot
+    const newNative = ethers.utils.parseEther("2500");
+    const newT1 = ethers.utils.parseEther("3");
+    await expect(priceOracle.updatePrices([
+      ethers.constants.AddressZero,
+      t1.address
+    ], [
+      newNative,
+      newT1
+    ])).to.not.be.reverted;
+    const nInfo = await priceOracle.getTokenData(ethers.constants.AddressZero);
+    const t1Info = await priceOracle.getTokenData(t1.address);
+    expect(nInfo.price).to.equal(newNative);
+    expect(t1Info.price).to.equal(newT1);
+  });
+
+  it("setBandFeed error branches: ZeroAddress and invalid pair", async function () {
+    // ZeroAddress for adapter
+    await expect(priceOracle.setBandFeed(ethers.constants.AddressZero, ethers.constants.AddressZero, "ONE", "USD"))
+      .to.be.revertedWithCustomError(priceOracle, "ZeroAddress");
+
+    // invalid pair (empty strings) on supported token
+    await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
+    await expect(priceOracle.setBandFeed(mockToken.address, mockToken.address, "", ""))
+      .to.be.revertedWith("Invalid pair");
+  });
+
+  it("cannot remove native ONE and removing unsupported token reverts", async function () {
+    // cannot remove native ONE
+    await expect(priceOracle.removeToken(ethers.constants.AddressZero)).to.be.revertedWith("Cannot remove native ONE");
+    // removing unsupported token reverts with custom error
+    const t2 = await (await (await ethers.getContractFactory("MockERC20")).deploy("T2","T2",18)).deployed();
+    await expect(priceOracle.removeToken(t2.address)).to.be.revertedWithCustomError(priceOracle, "TokenNotSupported");
+  });
+
   it("staleness via convertToUSD reverts when stale", async function () {
     await priceOracle.addToken(mockToken.address, 18, ethers.utils.parseEther("1"));
     await priceOracle.setMaxPriceAge(1);
