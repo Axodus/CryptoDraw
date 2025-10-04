@@ -26,12 +26,3 @@ contract MockToken is ERC20 {
         _burn(from, amount);
     }
 }
-
-// Alias para compatibilidade com testes
-contract MockERC20 is MockToken {
-    constructor(
-        string memory name,
-        string memory symbol,
-        uint8 decimals_
-    ) MockToken(name, symbol, decimals_) {}
-}
