@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 
-describe('Full coverage tests for GameLibrary, PriceOracle, TicketNFT, CryptoDraw', function () {
+describe('Minor peripherical tests for GameLibrary, PriceOracle, TicketNFT, CryptoDraw', function () {
   let owner, operator, agent, user, user2;
   beforeEach(async function () {
     [owner, operator, agent, user, user2] = await ethers.getSigners();

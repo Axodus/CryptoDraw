@@ -179,3 +179,134 @@ describe("TicketNFT Contract (aligned with current API)", function () {
     });
   });
 });
+
+// ===== Merged from test/v2/TicketNFT* (extended coverage) =====
+describe("TicketNFT - Extended Coverage (merged)", function () {
+  let ticketNFT, owner, user1, user2, minter;
+
+  beforeEach(async function () {
+    [owner, user1, user2, minter] = await ethers.getSigners();
+    const TicketNFT = await ethers.getContractFactory("TicketNFT");
+    ticketNFT = await TicketNFT.deploy();
+    // set a dedicated minter as CryptoDraw contract address
+    await ticketNFT.setCryptoDrawAddress(minter.address);
+  });
+
+  it("reverts when minting to zero address", async function () {
+    await expect(
+      ticketNFT.connect(minter).mint(ethers.constants.AddressZero, 0, 12345, 1, 1)
+    ).to.be.revertedWith("Invalid recipient");
+  });
+
+  it("accepts rounds at boundaries and rejects invalid ones", async function () {
+    await expect(ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1)).to.not.be.reverted;
+    await expect(ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 6)).to.not.be.reverted;
+    await expect(ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 0)).to.be.revertedWith("Invalid rounds count");
+    await expect(ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 7)).to.be.revertedWith("Invalid rounds count");
+  });
+
+  it("mints with large drawRound values", async function () {
+    const maxUint256 = ethers.constants.MaxUint256;
+    await expect(ticketNFT.connect(minter).mint(user1.address, 0, 12345, maxUint256, 1)).to.not.be.reverted;
+  });
+
+  it("increments token IDs sequentially", async function () {
+    const r1 = await (await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1)).wait();
+    const id1 = r1.events.find(e => e.event === 'TicketMinted').args.tokenId;
+    const r2 = await (await ticketNFT.connect(minter).mint(user1.address, 0, 54321, 1, 1)).wait();
+    const id2 = r2.events.find(e => e.event === 'TicketMinted').args.tokenId;
+    expect(id2).to.equal(id1.add(1));
+  });
+
+  it("getTicket returns full info and reverts for non-existent", async function () {
+    const r = await (await ticketNFT.connect(minter).mint(user1.address, 1, 11111, 10, 5)).wait();
+    const id = r.events.find(e => e.event === 'TicketMinted').args.tokenId;
+    const t = await ticketNFT.getTicket(id);
+    expect(t.player).to.equal(user1.address);
+    expect(t.game).to.equal(1);
+    expect(t.numbersPacked).to.equal(11111);
+    expect(t.drawRound).to.equal(10);
+    expect(t.roundsBought).to.equal(5);
+    expect(t.roundsRemaining).to.equal(5);
+    expect(t.status).to.equal(0);
+    await expect(ticketNFT.getTicket(999999)).to.be.revertedWithCustomError(ticketNFT, 'TokenNotExists');
+  });
+
+  it("updateStatus emits event and handles all statuses", async function () {
+    const r = await (await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1)).wait();
+    const id = r.events.find(e => e.event === 'TicketMinted').args.tokenId;
+    await expect(ticketNFT.connect(minter).updateStatus(id, 2)).to.emit(ticketNFT, 'TicketStatusUpdated');
+    for (let s = 0; s <= 3; s++) {
+      await ticketNFT.connect(minter).updateStatus(id, s);
+      const t = await ticketNFT.getTicket(id);
+      expect(t.status).to.equal(s);
+    }
+    await expect(ticketNFT.connect(minter).updateStatus(999999, 1)).to.be.revertedWithCustomError(ticketNFT, 'TokenNotExists');
+  });
+
+  it("burn emits event and reverts on invalid token", async function () {
+    const r = await (await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1)).wait();
+    const id = r.events.find(e => e.event === 'TicketMinted').args.tokenId;
+    await expect(ticketNFT.connect(minter).burn(id)).to.emit(ticketNFT, 'TicketBurned');
+    await expect(ticketNFT.ownerOf(id)).to.be.revertedWith('ERC721: invalid token ID');
+    await expect(ticketNFT.connect(minter).burn(999999)).to.be.revertedWithCustomError(ticketNFT, 'TokenNotExists');
+    await expect(ticketNFT.connect(minter).burn(id)).to.be.revertedWithCustomError(ticketNFT, 'TokenNotExists');
+  });
+
+  it("decrementRounds down to zero then reverts beyond", async function () {
+    const r = await (await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 2)).wait();
+    const id = r.events.find(e => e.event === 'TicketMinted').args.tokenId;
+    await ticketNFT.connect(minter).decrementRounds(id);
+    await ticketNFT.connect(minter).decrementRounds(id);
+    const t = await ticketNFT.getTicket(id);
+    expect(t.roundsRemaining).to.equal(0);
+    expect(t.status).to.equal(1); // EXPIRED
+    await expect(ticketNFT.connect(minter).decrementRounds(id)).to.be.revertedWith('No rounds remaining');
+  });
+
+  it("user ticket balances tracked across multiple mints", async function () {
+    await ticketNFT.connect(minter).mint(user1.address, 0, 1, 1, 1);
+    await ticketNFT.connect(minter).mint(user1.address, 1, 2, 2, 2);
+    await ticketNFT.connect(minter).mint(user2.address, 0, 3, 1, 1);
+    expect(await ticketNFT.balanceOf(user1.address)).to.equal(2);
+    expect(await ticketNFT.balanceOf(user2.address)).to.equal(1);
+  });
+
+  it("tokenURI encodes JSON and reflects status changes", async function () {
+    const r = await (await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1)).wait();
+    const id = r.events.find(e => e.event === 'TicketMinted').args.tokenId;
+
+    const uriActive = await ticketNFT.tokenURI(id);
+    const base64Active = uriActive.split(',')[1];
+    const jsonActive = Buffer.from(base64Active, 'base64').toString('utf8');
+    expect(jsonActive).to.include('#');
+
+    await ticketNFT.connect(minter).updateStatus(id, 1);
+    const uriExpired = await ticketNFT.tokenURI(id);
+    const jsonExpired = Buffer.from(uriExpired.split(',')[1], 'base64').toString('utf8');
+    expect(jsonExpired).to.include('Expired');
+
+    await ticketNFT.connect(minter).updateStatus(id, 2);
+    const uriRedeemed = await ticketNFT.tokenURI(id);
+    const jsonRedeemed = Buffer.from(uriRedeemed.split(',')[1], 'base64').toString('utf8');
+    expect(jsonRedeemed).to.include('Redeemed');
+
+    // Burned token should revert on tokenURI
+    const r2 = await (await ticketNFT.connect(minter).mint(user1.address, 0, 54321, 1, 1)).wait();
+    const id2 = r2.events.find(e => e.event === 'TicketMinted').args.tokenId;
+    await ticketNFT.connect(minter).burn(id2);
+    await expect(ticketNFT.tokenURI(id2)).to.be.reverted;
+  });
+
+  it("transferFrom reverts with custom error TransferNotAllowed", async function () {
+    const r = await (await ticketNFT.connect(minter).mint(user1.address, 0, 12345, 1, 1)).wait();
+    const id = r.events.find(e => e.event === 'TicketMinted').args.tokenId;
+    await expect(ticketNFT.connect(user1).transferFrom(user1.address, user2.address, id)).to.be.revertedWithCustomError(ticketNFT, 'TransferNotAllowed');
+    await ticketNFT.connect(user1).approve(user2.address, id);
+    await expect(ticketNFT.connect(user2).transferFrom(user1.address, user2.address, id)).to.be.revertedWithCustomError(ticketNFT, 'TransferNotAllowed');
+  });
+
+  it("supports ERC721 interface id", async function () {
+    expect(await ticketNFT.supportsInterface('0x80ac58cd')).to.be.true;
+  });
+});
