@@ -12,6 +12,9 @@ module.exports = {
       // viaIR desabilitado para testes para evitar warnings
     }
   },
+  coverage: {
+    skipFiles: ["contracts/mocks/", "test/v2/"],
+  },
   networks: {
     hardhat: {
       chainId: 31337,
