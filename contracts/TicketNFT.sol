@@ -1,41 +1,131 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
+/**
+ * @title TicketNFT
+ * @dev NFT não-transferível representando tickets da loteria CryptoDraw
+ * @notice Suporta dois tipos de jogos: SuperSeven e EasyLotto (Lotofácil)
+ */
 contract TicketNFT is ERC721, Ownable, ERC721Burnable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
-    address public cryptoDrawAddress;
-
-    struct Ticket {
-        address player;
-        uint8[] chosenNumbers;
-        uint256 drawRound; // Store draw round info
+    // ============ ERRORS ============
+    
+    error OnlyCryptoDrawContract();
+    error TokenNotExists();
+    error TransferNotAllowed();
+    
+    // ============ ENUMS ============
+    
+    enum GameType {
+    SUPERSEVEN,   // 0: SuperSeven (7 colunas, 0-9)
+        EASYLOTTO     // 1: EasyLotto/Lotofácil (15 números de 1-25)
+    }
+    
+    enum TicketStatus {
+        ACTIVE,       // 0: Ticket ativo
+        EXPIRED,      // 1: Ticket expirado
+        REDEEMED,     // 2: Prêmio resgatado
+        BURNED        // 3: Ticket queimado
     }
 
+    // ============ STRUCTS ============
+    
+    /**
+     * @dev Estrutura de dados do ticket
+     * @param player Endereço do jogador
+     * @param game Tipo de jogo
+     * @param numbersPacked Números escolhidos em formato compacto (uint32)
+     * @param drawRound Round do sorteio
+     * @param roundsBought Quantidade de rodadas compradas (1-6)
+     * @param roundsRemaining Rodadas restantes
+     * @param createdAt Timestamp de criação
+     * @param status Status do ticket
+     */
+    struct Ticket {
+        address player;
+        GameType game;
+        uint32 numbersPacked;
+        uint256 drawRound;
+        uint8 roundsBought;
+        uint8 roundsRemaining;
+        uint256 createdAt;
+        TicketStatus status;
+    }
+
+    // ============ STATE VARIABLES ============
+    
+    address public cryptoDrawAddress;
+    
     mapping(uint256 => Ticket) private _tickets;
 
-    event TicketMinted(address indexed to, uint256 tokenId, uint256 drawRound);
-    event TicketBurned(uint256 tokenId);
+    // ============ EVENTS ============
+    
+    event TicketMinted(
+        address indexed to, 
+        uint256 indexed tokenId, 
+        GameType game,
+        uint256 drawRound,
+        uint8 rounds
+    );
+    
+    event TicketBurned(uint256 indexed tokenId);
+    
+    event TicketStatusUpdated(
+        uint256 indexed tokenId,
+        TicketStatus oldStatus,
+        TicketStatus newStatus
+    );
 
-    constructor() ERC721("TicketNFT", "TNFT") {}
+    // ============ CONSTRUCTOR ============
+    
+    constructor() ERC721("CryptoDraw Ticket", "CDRAW") {}
 
+    // ============ MODIFIERS ============
+    
+    modifier onlyCryptoDraw() {
+        if (msg.sender != cryptoDrawAddress) revert OnlyCryptoDrawContract();
+        _;
+    }
+
+    // ============ ADMIN FUNCTIONS ============
+    
+    /**
+     * @dev Define o endereço do contrato CryptoDraw
+     * @param _cryptoDrawAddress Endereço do contrato principal
+     */
     function setCryptoDrawAddress(address _cryptoDrawAddress) external onlyOwner {
+        require(_cryptoDrawAddress != address(0), "Invalid address");
         cryptoDrawAddress = _cryptoDrawAddress;
     }
 
-    function burn(uint256 tokenId) public override {
-        require(msg.sender == cryptoDrawAddress, "Only CryptoDraw contract can burn tokens");
-        super.burn(tokenId);
-        emit TicketBurned(tokenId);
-    }
-
-    function mint(address to, uint8[] memory _chosenNumbers, uint256 _drawRound) external onlyOwner returns (uint256) {
+    // ============ EXTERNAL FUNCTIONS ============
+    
+    /**
+     * @dev Cria um novo ticket NFT
+     * @param to Endereço do destinatário
+     * @param game Tipo de jogo
+     * @param numbersPacked Números em formato compacto
+     * @param drawRound Round do sorteio
+     * @param rounds Quantidade de rodadas
+     * @return tokenId ID do token criado
+     */
+    function mint(
+        address to,
+        GameType game,
+        uint32 numbersPacked,
+        uint256 drawRound,
+        uint8 rounds
+    ) external onlyCryptoDraw returns (uint256) {
+        require(to != address(0), "Invalid recipient");
+        require(rounds >= 1 && rounds <= 6, "Invalid rounds count");
+        
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         
@@ -43,44 +133,220 @@ contract TicketNFT is ERC721, Ownable, ERC721Burnable {
 
         _tickets[tokenId] = Ticket({
             player: to,
-            chosenNumbers: _chosenNumbers,
-            drawRound: _drawRound
+            game: game,
+            numbersPacked: numbersPacked,
+            drawRound: drawRound,
+            roundsBought: rounds,
+            roundsRemaining: rounds,
+            createdAt: block.timestamp,
+            status: TicketStatus.ACTIVE
         });
 
-        emit TicketMinted(to, tokenId, _drawRound);
+        emit TicketMinted(to, tokenId, game, drawRound, rounds);
 
         return tokenId;
     }
+    
+    /**
+     * @dev Queima um ticket
+     * @param tokenId ID do token a ser queimado
+     */
+    function burn(uint256 tokenId) public override onlyCryptoDraw {
+        _updateTicketStatus(tokenId, TicketStatus.BURNED);
+        // Bypass ERC721Burnable owner/approval requirement since onlyCryptoDraw is enforced
+        _burn(tokenId);
+        emit TicketBurned(tokenId);
+    }
+    
+    /**
+     * @dev Atualiza o status do ticket
+     * @param tokenId ID do token
+     * @param newStatus Novo status
+     */
+    function updateStatus(uint256 tokenId, TicketStatus newStatus) 
+        external 
+        onlyCryptoDraw 
+    {
+        _updateTicketStatus(tokenId, newStatus);
+    }
+    
+    /**
+     * @dev Decrementa rodadas restantes do ticket
+     * @param tokenId ID do token
+     */
+    function decrementRounds(uint256 tokenId) external onlyCryptoDraw {
+        if (!_exists(tokenId)) revert TokenNotExists();
+        
+        Ticket storage ticket = _tickets[tokenId];
+        require(ticket.roundsRemaining > 0, "No rounds remaining");
+        
+        ticket.roundsRemaining--;
+        
+        // Auto-expirar se não tiver mais rodadas
+        if (ticket.roundsRemaining == 0 && ticket.status == TicketStatus.ACTIVE) {
+            _updateTicketStatus(tokenId, TicketStatus.EXPIRED);
+        }
+    }
 
-    function getTicket(uint256 tokenId) external view returns (address player, uint8[] memory chosenNumbers, uint256 drawRound) {
-        require(_exists(tokenId), "TicketNFT: query for nonexistent token");
+    // ============ VIEW FUNCTIONS ============
+    
+    /**
+     * @dev Retorna os dados completos de um ticket
+     * @param tokenId ID do token
+     * @return ticket Estrutura Ticket completa
+     */
+    function getTicket(uint256 tokenId) 
+        external 
+        view 
+        returns (Ticket memory ticket) 
+    {
+        if (!_exists(tokenId)) revert TokenNotExists();
+        return _tickets[tokenId];
+    }
+    
+    /**
+     * @dev Retorna dados básicos de um ticket
+     * @param tokenId ID do token
+     */
+    function getTicketBasic(uint256 tokenId) 
+        external 
+        view 
+        returns (
+            address player,
+            GameType game,
+            uint32 numbersPacked,
+            uint256 drawRound
+        ) 
+    {
+        if (!_exists(tokenId)) revert TokenNotExists();
+        Ticket memory ticket = _tickets[tokenId];
+        return (ticket.player, ticket.game, ticket.numbersPacked, ticket.drawRound);
+    }
+    
+    /**
+     * @dev Verifica se um ticket está ativo
+     * @param tokenId ID do token
+     * @return isActive Se o ticket está ativo
+     */
+    function isTicketActive(uint256 tokenId) external view returns (bool) {
+        if (!_exists(tokenId)) return false;
+        return _tickets[tokenId].status == TicketStatus.ACTIVE && 
+               _tickets[tokenId].roundsRemaining > 0;
+    }
+    
+    /**
+     * @dev Retorna o status de um ticket
+     * @param tokenId ID do token
+     * @return status Status do ticket
+     */
+    function getTicketStatus(uint256 tokenId) 
+        external 
+        view 
+        returns (TicketStatus) 
+    {
+        if (!_exists(tokenId)) revert TokenNotExists();
+        return _tickets[tokenId].status;
+    }
+
+    /**
+     * @dev Retorna metadata URI do token
+     * @param tokenId ID do token
+     * @return URI com metadata JSON
+     */
+    function tokenURI(uint256 tokenId) 
+        public 
+        view 
+        virtual 
+        override 
+        returns (string memory) 
+    {
+        if (!_exists(tokenId)) revert TokenNotExists();
 
         Ticket memory ticket = _tickets[tokenId];
-        return (ticket.player, ticket.chosenNumbers, ticket.drawRound);
-    }
-
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        require(_exists(tokenId), "TicketNFT: URI query for nonexistent token");
-
-        // Generate the token name as "#123456789"
-        string memory tokenName = string(abi.encodePacked("#", uint2str(tokenId)));
         
-        // Generate a custom image URL
-        string memory imageURL = string(abi.encodePacked("https://example.com/images/", uint2str(tokenId), ".png"));
+    string memory gameName = ticket.game == GameType.SUPERSEVEN ? "SuperSeven" : "EasyLotto";
+        string memory statusName = _getStatusName(ticket.status);
+        
+        // Gera o nome do token como "#123456789"
+        string memory tokenName = string(abi.encodePacked("#", _uint2str(tokenId)));
+        
+        // URL da imagem customizada
+        string memory imageURL = string(
+            abi.encodePacked(
+                "https://cryptodraw.io/images/",
+                gameName,
+                "/",
+                _uint2str(tokenId),
+                ".png"
+            )
+        );
 
-        // Construct the token metadata
-        string memory metadata = string(abi.encodePacked(
-            '{"name": "', tokenName, '",',
-            '"description": "Ticket NFT for CryptoDraw. Draw round: ', uint2str(_tickets[tokenId].drawRound), '",',
-            '"image": "', imageURL, '"}'
-        ));
+        // Constrói metadata JSON
+        string memory metadata = string(
+            abi.encodePacked(
+                '{"name": "', tokenName, '",',
+                '"description": "CryptoDraw ', gameName, ' Ticket - Draw #', _uint2str(ticket.drawRound), '",',
+                '"image": "', imageURL, '",',
+                '"attributes": [',
+                    '{"trait_type": "Game", "value": "', gameName, '"},',
+                    '{"trait_type": "Draw Round", "value": ', _uint2str(ticket.drawRound), '},',
+                    '{"trait_type": "Rounds Bought", "value": ', _uint2str(uint256(ticket.roundsBought)), '},',
+                    '{"trait_type": "Rounds Remaining", "value": ', _uint2str(uint256(ticket.roundsRemaining)), '},',
+                    '{"trait_type": "Status", "value": "', statusName, '"}',
+                ']}'
+            )
+        );
 
-        // Return the metadata URL (using a data URI scheme here for simplicity)
-        return string(abi.encodePacked("data:application/json;base64,", base64Encode(bytes(metadata))));
+        return string(abi.encodePacked("data:application/json;base64,", _base64Encode(bytes(metadata))));
     }
 
-    // Helper function to convert uint to string
-    function uint2str(uint256 _i) internal pure returns (string memory _uintAsString) {
+    // ============ INTERNAL FUNCTIONS ============
+    
+    /**
+     * @dev Atualiza o status interno do ticket
+     */
+    function _updateTicketStatus(uint256 tokenId, TicketStatus newStatus) internal {
+        if (!_exists(tokenId)) revert TokenNotExists();
+        
+        TicketStatus oldStatus = _tickets[tokenId].status;
+        _tickets[tokenId].status = newStatus;
+        
+        emit TicketStatusUpdated(tokenId, oldStatus, newStatus);
+    }
+    
+    /**
+     * @dev Retorna o nome do status
+     */
+    function _getStatusName(TicketStatus status) internal pure returns (string memory) {
+        if (status == TicketStatus.ACTIVE) return "Active";
+        if (status == TicketStatus.EXPIRED) return "Expired";
+        if (status == TicketStatus.REDEEMED) return "Redeemed";
+        return "Burned";
+    }
+
+    /**
+     * @dev Override para desabilitar transferências (soulbound)
+     */
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId,
+        uint256 batchSize
+    ) internal virtual override {
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
+        
+        // Permite mint (from == 0) e burn (to == 0), mas não transferências
+        if (from != address(0) && to != address(0)) {
+            revert TransferNotAllowed();
+        }
+    }
+
+    // ============ HELPER FUNCTIONS ============
+    
+    /**
+     * @dev Converte uint para string
+     */
+    function _uint2str(uint256 _i) internal pure returns (string memory) {
         if (_i == 0) {
             return "0";
         }
@@ -100,10 +366,12 @@ contract TicketNFT is ERC721, Ownable, ERC721Burnable {
         return string(bstr);
     }
 
-    // Base64 encoding of the JSON metadata
+    /**
+     * @dev Codifica bytes em base64
+     */
     string internal constant TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-    function base64Encode(bytes memory input) internal pure returns (string memory) {
+    function _base64Encode(bytes memory input) internal pure returns (string memory) {
         uint256 inputLength = input.length;
         uint256 outputLength = 4 * ((inputLength + 2) / 3);
         bytes memory result = new bytes(outputLength);
@@ -129,5 +397,5 @@ contract TicketNFT is ERC721, Ownable, ERC721Burnable {
 
         return string(result);
     }
-
 }
+

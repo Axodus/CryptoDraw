@@ -34,6 +34,17 @@
       "PROJECT_FUND": "0x71E0F7359Ccf0b30752694163089C6D173F8DF5d",
       "GRANT_FUND": "0x7ED2C8E2543b79211671B1A37E70F9538e8BfBAa",
       "OPERATION_FUND": "0x6533d916639AFADB3AB2B939c312698249b203de"
+    },
+    "harmony_testnet": {
+      "RPC_URL": "https://api.s0.b.hmny.io",
+      "NATIVE_TOKEN": "0xf59de020d650e69ef0755bf37f3d16b80ee132f5",
+      "TICKET_NFT_ADDRESS": "0x...",
+      "VRF_COORDINATOR_ADDRESS": "0x...",
+      "KEY_HASH": "0x...",
+      "SUBSCRIPTION_ID": "1234",
+      "PRICE_FEED_ADDRESS": "0x...",
+      "PROJECT_FUND": "0x...",
+      "GRANT_FUND": "0x...",
+      "OPERATION_FUND": "0x..."
     }
   }
-  

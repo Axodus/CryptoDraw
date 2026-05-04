@@ -1,0 +1,70 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "PriceOracleMock",
+  "sourceName": "contracts/mocks/Mocks.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestRoundData",
+      "outputs": [
+        {
+          "internalType": "uint80",
+          "name": "roundId",
+          "type": "uint80"
+        },
+        {
+          "internalType": "int256",
+          "name": "answer",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "answeredInRound",
+          "type": "uint80"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int256",
+          "name": "price",
+          "type": "int256"
+        }
+      ],
+      "name": "setPrice",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523461002b57642e90edd000600055600860ff19600154161760015560e490816100318239f35b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c908163313ce56714608d57508063f7a308061460755763feaf968c14603e57600080fd5b346072578060031936011260725760a090546040519060018252602082015242604082015242606082015260016080820152f35b80fd5b50346072576020366003190112607257600435815580f35b90503460aa578160031936011260aa5760209060ff600154168152f35b5080fdfea2646970667358221220d1e3eef1bd72569902fc96b3aca3aa250b79a140c247fd6ec495c7f87c7c016164736f6c63430008120033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c908163313ce56714608d57508063f7a308061460755763feaf968c14603e57600080fd5b346072578060031936011260725760a090546040519060018252602082015242604082015242606082015260016080820152f35b80fd5b50346072576020366003190112607257600435815580f35b90503460aa578160031936011260aa5760209060ff600154168152f35b5080fdfea2646970667358221220d1e3eef1bd72569902fc96b3aca3aa250b79a140c247fd6ec495c7f87c7c016164736f6c63430008120033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
